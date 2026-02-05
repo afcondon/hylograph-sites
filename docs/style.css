@@ -153,26 +153,43 @@ body {
   margin-bottom: 1rem;
 }
 
-.libraries ul {
+.lib-list {
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 0.75rem;
 }
 
-.libraries a {
-  color: var(--text-primary);
-  text-decoration: none;
-  font-family: monospace;
-  font-size: 0.85rem;
-  padding: 0.25rem 0.5rem;
+.lib-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 4px;
+  transition: border-color 0.2s;
 }
 
-.libraries a:hover {
-  background: #e8e8e8;
+.lib-list li:hover {
+  border-color: #999;
+}
+
+.lib-list a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.lib-list a:hover {
+  text-decoration: underline;
+}
+
+.lib-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 /* Footer */
