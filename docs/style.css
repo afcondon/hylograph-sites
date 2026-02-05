@@ -142,7 +142,11 @@ body {
 /* Libraries nav */
 .libraries {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 0 auto 2.5rem;
+}
+
+.libraries:last-of-type {
+  margin-bottom: 0;
 }
 
 .libraries h3 {
