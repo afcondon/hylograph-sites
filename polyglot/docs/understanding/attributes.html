@@ -1,0 +1,238 @@
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_attribute_variants">Attribute Variants</a></li>
+<li><a href="#_the_contravariant_pattern">The Contravariant Pattern</a></li>
+<li><a href="#_type_safety_guarantees">Type Safety Guarantees</a>
+<ul class="sectlevel2">
+<li><a href="#_common_compile_time_errors">Common Compile-Time Errors</a></li>
+</ul>
+</li>
+<li><a href="#_common_attributes">Common Attributes</a>
+<ul class="sectlevel2">
+<li><a href="#_positioning">Positioning</a></li>
+<li><a href="#_dimensions">Dimensions</a></li>
+<li><a href="#_styling">Styling</a></li>
+<li><a href="#_text">Text</a></li>
+<li><a href="#_transforms">Transforms</a></li>
+<li><a href="#_general">General</a></li>
+</ul>
+</li>
+<li><a href="#_summary">Summary</a></li>
+<li><a href="#_see_also">See Also</a></li>
+</ul>
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A key innovation of D3 is the natural way to go from static to data-driven attributes. PSD3 preserves this flexibility while adding compile-time type safety through typeclasses and phantom types.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_attribute_variants">Attribute Variants</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Attributes in PSD3 can take three forms, all with the same clean syntax:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/diagrams/attribute-resolution.svg" alt="Attribute type resolution diagram">
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 40%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Form</th>
+<th class="tableblock halign-left valign-top">Example</th>
+<th class="tableblock halign-left valign-top">Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Static</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>radius 10.0</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Same value for all elements</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Datum Function</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cx (\d &#8594; d.x)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Value depends on bound data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Datum + Index</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>x (\d i &#8594; 50.0 + i * 100.0)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Value depends on data and position</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+The <code>IsAttribute</code> typeclass resolves all three forms at compile time.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_contravariant_pattern">The Contravariant Pattern</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Attributes form a <em>Contravariant Functor</em>. This means you can transform the input data type before the attribute sees it.</p>
+</div>
+<div class="paragraph">
+<p>Why contravariant? Regular functors transform <em>outputs</em>. Attributes transform <em>inputs</em> (the datum they receive).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-purescript hljs" data-lang="purescript">-- Extract the name field before setting text content
+cmap _.name (textContent identity)
+
+-- Transform coordinates before positioning
+cmap (\d -&gt; { x: d.lon * 10.0, y: d.lat * 10.0 }) (cx _.x)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_type_safety_guarantees">Type Safety Guarantees</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The attribute system provides several compile-time guarantees:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Datum type matching</strong> - Attributes must match the selection&#8217;s datum type</p>
+</li>
+<li>
+<p><strong>Attribute value types</strong> - <code>radius</code> requires Number, <code>fill</code> requires String</p>
+</li>
+<li>
+<p><strong>No missing attributes</strong> - Arrays of attributes are explicit and type-checked</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_common_compile_time_errors">Common Compile-Time Errors</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-purescript hljs" data-lang="purescript">-- Type error: expected Number, got String
+radius "10"
+
+-- Type error: field 'x' not found in datum type
+cx (\d -&gt; d.x)  -- when datum doesn't have 'x' field</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Runtime errors in D3 become compile-time errors in PSD3.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_common_attributes">Common Attributes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>PSD3 provides typed wrappers for all common SVG and HTML attributes:</p>
+</div>
+<div class="sect2">
+<h3 id="_positioning">Positioning</h3>
+<div class="paragraph">
+<p><code>cx</code>, <code>cy</code>, <code>x</code>, <code>y</code>, <code>x1</code>, <code>y1</code>, <code>x2</code>, <code>y2</code> - coordinate positions</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dimensions">Dimensions</h3>
+<div class="paragraph">
+<p><code>width</code>, <code>height</code>, <code>radius</code>, <code>rx</code>, <code>ry</code> - size attributes</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_styling">Styling</h3>
+<div class="paragraph">
+<p><code>fill</code>, <code>stroke</code>, <code>strokeWidth</code>, <code>fillOpacity</code>, <code>strokeOpacity</code> - colors and strokes</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_text">Text</h3>
+<div class="paragraph">
+<p><code>textContent</code>, <code>textAnchor</code>, <code>fontSize</code>, <code>fontWeight</code> - text styling</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_transforms">Transforms</h3>
+<div class="paragraph">
+<p><code>transform</code>, <code>translate</code>, <code>rotate</code>, <code>scale</code> - geometric transforms</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_general">General</h3>
+<div class="paragraph">
+<p><code>class_</code>, <code>id_</code>, <code>d</code> (for paths), <code>viewBox</code> - common utilities</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary">Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>PSD3&#8217;s attribute system:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Three forms: static, datum function, datum+index</p>
+</li>
+<li>
+<p>Resolved at compile time via <code>IsAttribute</code> typeclass</p>
+</li>
+<li>
+<p>Contravariant functor for data transformation</p>
+</li>
+<li>
+<p>Type-safe: datum types, value types, completeness</p>
+</li>
+<li>
+<p>Comprehensive coverage of SVG and HTML attributes</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See Also</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="understanding/selections.html">Type-Safe Selections</a> - The indexed monad pattern</p>
+</li>
+<li>
+<p><a href="understanding/grammar.html">Grammar of D3</a> - How PSD3 models D3&#8217;s concepts</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
