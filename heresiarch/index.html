@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HSCH</title>
+  <link rel="stylesheet" href="assets/fonts.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #2a2a2a;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Kapra Neue', sans-serif;
+    }
+
+    .title {
+      font-size: 42vw;
+      font-weight: 900;
+      color: #8b0000;
+      letter-spacing: -0.02em;
+      line-height: 0.85;
+      user-select: none;
+      text-shadow: 0 0 100px rgba(139, 0, 0, 0.3);
+    }
+
+    .nav {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      font-size: 2.5rem;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="title">HSCH</div>
+
+  <nav class="nav">
+    <a href="tarot.html" class="nav-btn" title="Tarot">🃏</a>
+    <a href="fragments.html" class="nav-btn" title="Fragments">🎲</a>
+  </nav>
+</body>
+</html>
