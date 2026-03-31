@@ -142,11 +142,7 @@ body {
 /* Libraries nav */
 .libraries {
   max-width: 800px;
-  margin: 0 auto 2.5rem;
-}
-
-.libraries:last-of-type {
-  margin-bottom: 0;
+  margin: 0 auto;
 }
 
 .libraries h3 {
@@ -157,43 +153,26 @@ body {
   margin-bottom: 1rem;
 }
 
-.lib-list {
+.libraries ul {
   list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
-.lib-list li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.75rem 1rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  transition: border-color 0.2s;
-}
-
-.lib-list li:hover {
-  border-color: #999;
-}
-
-.lib-list a {
+.libraries a {
   color: var(--text-primary);
   text-decoration: none;
   font-family: monospace;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
 
-.lib-list a:hover {
-  text-decoration: underline;
-}
-
-.lib-desc {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+.libraries a:hover {
+  background: #e8e8e8;
 }
 
 /* Footer */
