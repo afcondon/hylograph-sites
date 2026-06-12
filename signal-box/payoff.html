@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Box — the payoff</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app payoff-page">
+    <header>
+      <nav class="page-nav">
+        <a href="index.html">MISU</a>
+        <a href="domain.html">Domain</a>
+        <a href="app.html">Types</a>
+        <a href="evaluation.html">Results</a>
+        <span class="page-nav-current">Extension</span>
+      </nav>
+      <p class="kicker">Signal Box — the payoff</p>
+      <h1>Consistency in multi-language environments</h1>
+      <p class="subtitle">
+        Everything you just saw (the oracle, the five types, the enumeration,
+        the counts) is one pure PureScript core with no foreign code in it.
+        The error-repelling surface you watched contract therefore compiles
+        to anything PureScript compiles to.
+      </p>
+    </header>
+
+    <section>
+      <p>
+        And that PureScript code can compile and run on at least the following
+        runtimes, integrating with the native languages of those runtimes:
+      </p>
+      <ul class="runtime-list">
+        <li>Browser / JavaScript</li>
+        <li>Node / JavaScript</li>
+        <li>Python</li>
+        <li>Julia</li>
+        <li>BEAM / Erlang</li>
+        <li>Go</li>
+        <li>Lua</li>
+        <li>WASM</li>
+      </ul>
+
+      <h2>Proving the consistency</h2>
+      <p>
+        This page recomputes the full audit, all five rungs and 93,900 states,
+        in your browser right now. It renders the same plain-text report the
+        terminal harness prints and hashes it. It then fetches the checked-in
+        reports from the other runtimes and hashes those too, client-side.
+        The agreement costs no seeds and no emulation layer: algebraic data
+        types mean the same thing on each runtime, and the hashes show it.
+      </p>
+      <div id="matrix"></div>
+      <p class="aside">
+        The greyed rows mark backends that exist without columns yet; each
+        will land as a receipt file and a hash. A disagreeing hash would be
+        useful news, since the same matrix doubles as a differential
+        conformance test of the backends themselves.
+      </p>
+    </section>
+
+    <footer>
+      <p>
+        One description of safety, written once and checked by a compiler,
+        runs the same way on each machine you own. That is the lever frame,
+        translated into algebra.
+      </p>
+    </footer>
+  </div>
+  <script src="payoff.js"></script>
+</body>
+</html>

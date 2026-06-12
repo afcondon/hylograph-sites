@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Make Illegal States Unrepresentable</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Full-bleed hero outside the .app container -->
+  <section class="landing-hero">
+    <div class="hero-text">
+      <p>Illegal state in a program is always a problem — that's uncontroversial.</p>
+      <p>How you defend against this happening is much more contested.</p>
+      <p>Defensive programming, invariants, static analysis, proof assistants — a lot of things have been tried.</p>
+      <p>Advocates of Strong Types, however, favor this One Weird Trick:</p>
+      <div class="hero-slogan">
+        <h1>Make Illegal States Unrepresentable</h1>
+      </div>
+    </div>
+    <figure class="hero-photo">
+      <img src="montparnasse-1895.jpg" alt="Steam locomotive hanging out of the shattered facade of Gare Montparnasse, 1895">
+      <figcaption>Train wreck at Gare Montparnasse, 1895. An illegal state, represented. (Photograph: Studio Lévy &amp; fils, public domain.)</figcaption>
+    </figure>
+  </section>
+
+  <!-- Centered content column below the hero -->
+  <div class="app landing">
+    <header>
+      <p>This website shows what happens as you refine a very basic "struct" from a C-like language, a few tweaks at a time. You whittle down the vast space of illegal states until you reach the point where no illegal state can be represented at all.</p>
+      <p>We'll show this by algorithmically generating counter-examples — illegal states — for each representation, until we have one that can no longer represent any. The generator is <a href="https://doi.org/10.1145/1411286.1411292">SmallCheck-style</a> bounded-exhaustive enumeration: every value the type can hold, up to a small bound, checked against a single safety oracle. The testing and the structure go hand-in-hand: you don't just trust the structure. But if you have the types and the tests right you no longer need, at a minimum, the same level of defensive programming.</p>
+
+      <nav class="page-nav">
+        <span class="page-nav-current">MISU</span>
+        <a href="domain.html">Domain</a>
+        <a href="app.html">Types</a>
+        <a href="evaluation.html">Results</a>
+        <a href="payoff.html">Extension</a>
+      </nav>
+    </header>
+  </div>
+</body>
+</html>

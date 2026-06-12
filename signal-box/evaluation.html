@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Box — evaluation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app eval-page">
+    <header>
+      <nav class="page-nav">
+        <a href="index.html">MISU</a>
+        <a href="domain.html">Domain</a>
+        <a href="app.html">Types</a>
+        <span class="page-nav-current">Results</span>
+        <a href="payoff.html">Extension</a>
+      </nav>
+      <p class="kicker">Signal Box — evaluation</p>
+      <h1>What got extinguished, and when</h1>
+      <p class="subtitle">
+        One bar per version of the state type, drawn to scale: every state
+        the type can express, each counted once under its gravest violation
+        (the same rule that colors the state grid). A family that has
+        vanished from a bar is extinct — the constructor for it no longer
+        exists. Legal coverage sits in its own column on the right, because
+        it isn't part of any bar's total.
+      </p>
+    </header>
+
+    <p class="small-multiples-lead">First, the territory itself: every physical state, colored by verdict; pale cells are unrepresentable at that rung.</p>
+
+    <div class="small-multiples">
+      <figure class="sm-fig">
+        <div id="grid-v0"></div>
+        <figcaption>v0 primitive soup</figcaption>
+      </figure>
+      <figure class="sm-fig">
+        <div id="grid-v1"></div>
+        <figcaption>v1 name your atoms</figcaption>
+      </figure>
+      <figure class="sm-fig">
+        <div id="grid-v2"></div>
+        <figcaption>v2 derive don't store</figcaption>
+      </figure>
+      <figure class="sm-fig">
+        <div id="grid-v3"></div>
+        <figcaption>v3 locking table as a type</figcaption>
+      </figure>
+      <figure class="sm-fig">
+        <div id="grid-v4"></div>
+        <figcaption>v4 parse don't validate</figcaption>
+      </figure>
+    </div>
+
+    <div id="eval-root"></div>
+
+    <section class="stp">
+      <h2>Reading the chart</h2>
+      <p>
+        The story is in two movements. The bars get shorter — the type can
+        say fewer and fewer things — and at the same time the colours drain
+        out of them, family by family, until v4 is a single green stripe:
+        everything sayable is safe.
+      </p>
+      <p>
+        Two bars deserve a second look. v0 and v1 have identical unsafe
+        segments — naming your atoms swept away the 88,400 nonsense states
+        (off scale, noted under the v0 bar) but not a single dangerous one. Vocabulary
+        and physics are different problems, and enums only solve the first.
+        And the coverage column holds at 202/202 on every row: no refinement
+        ever bought safety by outlawing a state the railway actually needs.
+        The squeeze only ever comes from above.
+      </p>
+      <p>
+        By v4 the bar is all green, out of an enumeration of everything the
+        type can express. That's the slogan made arithmetic:
+        representable = legal, counted.
+      </p>
+    </section>
+  </div>
+  <script src="site.js"></script>
+</body>
+</html>

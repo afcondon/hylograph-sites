@@ -1,0 +1,70 @@
+
+SIGNAL BOX — illegal states made unrepresentable, rung by rung
+
+  World:  single-line passing loop; segments A L M E, points P1 P2,
+          signals SA SL SE SM, trains T1 T2. Fixed forever.
+  Oracle: one isLegal, written once against the physical description.
+          The ladder's types converge on it.
+
+v0 — primitive soup  (infinite; 90,000-state bounded slice audited)
+    states 90000   malformed 88400   unsafe 1398   safe 202   physical coverage 202/202
+      malformed (uninterpretable): 88400
+        first: sa="G" sl="G" se="G" sm="G" p1=true p2=true t1="" t2="B"
+      derailment (green against points): 1200
+        first: sa="G" sl="G" se="G" sm="G" p1=true p2=true t1="" t2=""
+      conflicting greens: 900
+        first: sa="G" sl="G" se="G" sm="G" p1=true p2=true t1="" t2=""
+      collision (two trains, one segment): 256
+        first: sa="G" sl="G" se="G" sm="G" p1=true p2=true t1="A" t2="A"
+      green into occupied track: 960
+        first: sa="G" sl="G" se="G" sm="G" p1=true p2=true t1="" t2="A"
+
+v1 — name your atoms  (finite, exhaustive)
+    states 1600   malformed 0   unsafe 1398   safe 202   physical coverage 202/202
+      derailment (green against points): 1200
+        first: sa=R sl=R se=R sm=G p1=loop p2=loop t1=— t2=—
+      conflicting greens: 900
+        first: sa=R sl=R se=G sm=G p1=loop p2=loop t1=— t2=—
+      collision (two trains, one segment): 256
+        first: sa=R sl=R se=R sm=R p1=loop p2=loop t1=A t2=A
+      green into occupied track: 960
+        first: sa=R sl=R se=R sm=G p1=loop p2=loop t1=— t2=A
+
+v2 — derive, don't store  (finite, exhaustive)
+    states 1600   malformed 0   unsafe 792   safe 808   physical coverage 202/202
+      conflicting greens: 200
+        first: want={E→M,M→A} p1=main p2=main t1=— t2=—
+      collision (two trains, one segment): 256
+        first: want={} p1=loop p2=loop t1=A t2=A
+      green into occupied track: 544
+        first: want={M→A} p1=main p2=loop t1=— t2=A
+
+v3 — locking table as a type  (finite, exhaustive)
+    states 700   malformed 0   unsafe 236   safe 464   physical coverage 202/202
+      collision (two trains, one segment): 112
+        first: locked=none p1=loop p2=loop t1=A t2=A
+      green into occupied track: 140
+        first: locked=A→L p1=loop p2=loop t1=— t2=L
+
+v4 — parse, don't validate  (image of the total constructor)
+    states 464   malformed 0   unsafe 0   safe 464   physical coverage 202/202
+
+────────────────────────────────────────────────────────────────────────────────────────────────
+rung  technique                       states   malformed    unsafe    safe      coverage
+────────────────────────────────────────────────────────────────────────────────────────────────
+v0    primitive soup                   90000       88400      1398     202       202/202
+v1    name your atoms                   1600           —      1398     202       202/202
+v2    derive, don't store               1600           —       792     808       202/202
+v3    locking table as a type            700           —       236     464       202/202
+v4    parse, don't validate              464           —         —     464       202/202
+────────────────────────────────────────────────────────────────────────────────────────────────
+
+Extinction matrix — states per violation family each rung can still express:
+
+                                             v0       v1       v2       v3       v4
+malformed (uninterpretable)               88400        —        —        —        —
+derailment (green against points)          1200     1200        —        —        —
+conflicting greens                          900      900      200        —        —
+collision (two trains, one segment)         256      256      256      112        —
+green into occupied track                   960      960      544      140        —
+

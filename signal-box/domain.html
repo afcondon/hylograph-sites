@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Box — the domain</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app landing">
+    <header>
+      <nav class="page-nav">
+        <a href="index.html">MISU</a>
+        <span class="page-nav-current">Domain</span>
+        <a href="app.html">Types</a>
+        <a href="evaluation.html">Results</a>
+        <a href="payoff.html">Extension</a>
+      </nav>
+      <p class="kicker">Signal Box — the domain</p>
+      <h1>The Domain</h1>
+    </header>
+
+    <section class="stp">
+      <p>
+        We're going to use as an example a common, real-world, life-or-death
+        situation: train switching systems.
+      </p>
+      <p>
+        Our world is a <strong>passing loop</strong> on a single-track railway —
+        the arrangement that lets two trains travelling in opposite directions
+        get past each other. This is what it looks like when everything is
+        working:
+      </p>
+
+      <figure class="junction-fig wide">
+        <div id="fig-domain"></div>
+        <figcaption>The passing move: T1 enters the loop from the west while T2 takes the main from the east. Both signals are lawfully green.</figcaption>
+      </figure>
+
+      <ul class="domain-key">
+        <li><strong>A</strong> and <strong>E</strong> are the single-track approaches, west and east. <strong>L</strong> is the loop (eastbound traffic), <strong>M</strong> is the main (westbound).</li>
+        <li><strong>P1</strong> and <strong>P2</strong> are the points (switches) at each end of the loop. Each is set either <em>toward the loop</em> or <em>toward the main</em>; the heavy black blade in the diagram shows the current setting.</li>
+        <li><strong>SA, SL, SE, SM</strong> are the signals, one per permitted move: SA admits a train from A into the loop, SL releases it east, SE admits a train from E onto the main, SM releases it west. Green means go.</li>
+        <li><strong>T1</strong> and <strong>T2</strong> are the trains. A train sits on exactly one segment, or is off-scene.</li>
+      </ul>
+
+      <p>These are the failure states a real interlocking exists to prevent:</p>
+
+      <div class="figs-stacked">
+        <figure class="junction-fig">
+          <div id="fig-collision"></div>
+          <figcaption><span class="key-collision">collision</span> — two trains on one segment</figcaption>
+        </figure>
+        <figure class="junction-fig">
+          <div id="fig-conflict"></div>
+          <figcaption><span class="key-conflict">conflicting greens</span> — two signals clear clashing routes at once</figcaption>
+        </figure>
+        <figure class="junction-fig">
+          <div id="fig-derailment"></div>
+          <figcaption><span class="key-derailment">derailment</span> — a signal clears a train onto points set against it</figcaption>
+        </figure>
+      </div>
+
+      <p>
+        There's a fourth family, <span class="key-occupied">green into occupied
+        track</span> (a signal clearing a train toward a segment that already
+        has one on it), and a zeroth: states so malformed they don't describe
+        a railway at all. Throughout the site, the verdicts are colour-coded:
+      </p>
+
+      <div class="legend domain-legend">
+        <span class="legend-item"><span class="swatch" style="background:#2e7d32"></span>safe</span>
+        <span class="legend-item"><span class="swatch" style="background:#e09f3e"></span>derailment</span>
+        <span class="legend-item"><span class="swatch" style="background:#d64545"></span>conflicting greens</span>
+        <span class="legend-item"><span class="swatch" style="background:#9e4f9e"></span>collision</span>
+        <span class="legend-item"><span class="swatch" style="background:#5b7db1"></span>green into occupied</span>
+        <span class="legend-item"><span class="swatch" style="background:#b0b0ab"></span>malformed</span>
+      </div>
+
+      <p class="aside">
+        Simplifications, so the whole state space stays countable on one page:
+        two trains, four track segments, one safety rule-set (the oracle),
+        and — since strings are infinite — wherever a field is a String we
+        audit a small bounded slice of it: five plausible aspect spellings,
+        six plausible positions. Everything else is exhaustive.
+      </p>
+    </section>
+
+    <section class="stp">
+      <h2>Naive representation</h2>
+
+      <pre><code>-- v0 state
+type State =
+  { sa :: String
+  , sl :: String
+  , se :: String
+  , sm :: String
+  , p1 :: Boolean
+  , p2 :: Boolean
+  , t1 :: String
+  , t2 :: String
+  }</code></pre>
+
+      <p>The two obvious problems here are:</p>
+      <ol>
+        <li>the String encoding — is it "G", "Green", "green"? what does "" mean? what does "purple" mean? etc etc</li>
+        <li>Boolean blindness — <code>true</code> here means what? "towards the loop"?</li>
+      </ol>
+
+      <p>But what does it mean <em>in practice</em>? Let's generate the counter-examples:</p>
+    </section>
+
+    <section class="stp">
+      <h2>Commentary on the naive representation</h2>
+      <p>
+        There are a LOT of ways this can go wrong! Many, many states that would
+        result in disaster, derailment and death in the real world if they
+        occurred. Of the 90,000 values in our bounded slice, 88,400 don't even
+        describe a railway, and another 1,398 describe one in the process of
+        having an accident. The 202 states we actually mean are outnumbered
+        roughly 450 to 1 — and remember, the slice is a courtesy; the real
+        space is infinite.
+      </p>
+      <p>On the next page we'll start refining this.</p>
+      <p class="cta-row">
+        <a class="cta" href="app.html">Refine the type</a>
+      </p>
+    </section>
+  </div>
+  <script src="site.js"></script>
+</body>
+</html>
