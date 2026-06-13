@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript — the reference — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="javascript--the-reference">JavaScript — the reference</h1>
+<p class="meta-row"><strong>Target:</strong> JavaScript (browser &amp; Node) ·
+<strong>Lineage:</strong> compiler-integrated (this <em>is</em> <code>purs</code>) ·
+<strong>By:</strong> the PureScript core team ·
+<strong>Status:</strong> reference, definitional ·
+<strong>Repo:</strong> <a href="https://github.com/purescript/purescript">purescript/purescript</a></p>
+
+<p>The JavaScript backend is built into the compiler: <code>purs</code>
+lowers CoreFn to CoreImp and emits optimized ES modules. Its virtue is
+<strong>being everywhere</strong> — and being the semantic reference
+every other backend measures against. The browser and Node are the same
+code generator in two habitats; what differs is the runtime and FFI
+ecosystem, and therefore which programs make sense.</p>
+<h2 id="at-a-glance">At a glance</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Browser</th>
+<th>Node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ADT values</strong></td>
+<td>constructor functions + <code>instanceof</code>, fields
+<code>value0…</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><strong>Records</strong></td>
+<td>JS objects</td>
+<td>same</td>
+</tr>
+<tr>
+<td><strong>Int</strong></td>
+<td>double wrapped <code>|0</code> → int32</td>
+<td>same</td>
+</tr>
+<tr>
+<td><strong>Strings</strong></td>
+<td>UTF-16 code units</td>
+<td>same</td>
+</tr>
+<tr>
+<td><strong>Effect</strong></td>
+<td>nullary thunk; MagicDo collapses binds</td>
+<td>same</td>
+</tr>
+<tr>
+<td><strong>TCO</strong></td>
+<td>optimizer: self-tail-calls → <code>while</code> loops</td>
+<td>same</td>
+</tr>
+<tr>
+<td><strong>Concurrency</strong></td>
+<td>event loop, workers</td>
+<td>event loop, worker_threads</td>
+</tr>
+<tr>
+<td><strong>Native niche</strong></td>
+<td>DOM/UI (Halogen, react bindings)</td>
+<td>servers, CLIs, tooling</td>
+</tr>
+<tr>
+<td><strong>Library coverage</strong></td>
+<td>entire registry</td>
+<td>entire registry</td>
+</tr>
+</tbody>
+</table>
+<p>Because it's the reference, its quirks become the spec the others
+must decide whether to honour — most consequentially <strong>int32
+<code>Int</code></strong> (which overflows on
+<code>sumTo 1000000</code>) and <strong>UTF-16 strings</strong>.</p>
+<h2 id="also-in-this-habitat">Also in this habitat</h2>
+<p><a
+href="https://github.com/aristanetworks/purescript-backend-optimizer"><code>purs-backend-es</code></a>
+(Faubion / Arista) is an <em>optimizing</em> JS generator built on the
+shared backend-optimizer IR — same habitat, different generator. It
+belongs on the matrix as a control column.</p>
+  </main>
+</body>
+</html>

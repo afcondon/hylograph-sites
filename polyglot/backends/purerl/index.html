@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>purerl — Erlang / BEAM — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="purerl--erlang--beam">purerl — Erlang / BEAM</h1>
+<p class="meta-row"><strong>Target:</strong> Erlang / the BEAM ·
+<strong>Lineage:</strong> compiler-integrated (own frontend + optimizer) ·
+<strong>By:</strong> id3as ·
+<strong>Status:</strong> production-mature ·
+<strong>Repos:</strong> <a href="https://github.com/purerl/purerl">purerl/purerl</a> ·
+<a href="https://github.com/id3as/purescript-backend-erl">id3as/purescript-backend-erl</a></p>
+
+<p>purerl borrows the BEAM's <strong>process model</strong> —
+supervision, distribution, soft-realtime scheduling — and keeps
+PureScript's type system on top. Its semantic divergences are
+<em>upgrades along the BEAM grain</em>: arbitrary-precision integers and
+binary strings, accepted rather than papered over. It runs in production
+at id3as for media streaming, with maintained package sets.</p>
+<p>There are two Erlang backends. The original <strong>purerl</strong>
+is Haskell-based and reads CoreFn directly with its own hand-written
+optimizer (compiler-integrated). The newer
+<strong>purs-backend-erl</strong> is a PureScript rewrite that consumes
+the <a
+href="https://github.com/aristanetworks/purescript-backend-optimizer">backend-optimizer</a>
+IR (~30–40% faster output). Both are maintained by id3as and
+FFI-compatible.</p>
+<h2 id="at-a-glance">At a glance</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>purerl</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functions</strong></td>
+<td>curried funs; arity-optimized top-level variants</td>
+</tr>
+<tr>
+<td><strong>ADT values</strong></td>
+<td>tagged tuples, atom tag: <code>{just, X}</code></td>
+</tr>
+<tr>
+<td><strong>Records</strong></td>
+<td>Erlang maps (atom keys)</td>
+</tr>
+<tr>
+<td><strong>Typeclass dictionaries</strong></td>
+<td>maps</td>
+</tr>
+<tr>
+<td><strong>Int</strong></td>
+<td><strong>bignum</strong> (arbitrary precision)</td>
+</tr>
+<tr>
+<td><strong>Strings</strong></td>
+<td>UTF-8 binaries</td>
+</tr>
+<tr>
+<td><strong>TCO</strong></td>
+<td><strong>native BEAM TCO, including mutual recursion</strong></td>
+</tr>
+<tr>
+<td><strong>Concurrency</strong></td>
+<td><strong>processes + OTP supervision — the raison
+d'être</strong></td>
+</tr>
+<tr>
+<td><strong>Native niche</strong></td>
+<td>soft-realtime distributed systems, live supervision trees</td>
+</tr>
+<tr>
+<td><strong>Library coverage</strong></td>
+<td>large curated package sets</td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-divergences">Expected divergences</h2>
+<p><code>Int</code> is bignum, so the <code>INT64-</code> tests give
+exact answers (JS is the odd one out). Float printing via
+<code>io_lib:format</code> may differ from JS in exponent zones —
+discover it differentially. Strings are UTF-8 binaries, so
+<code>ASTRAL-</code> tests agree with the other bignum/UTF-8 backends,
+not JS. The core libs are mature — expect few shim bugs; most divergence
+is deliberate grain.</p>
+<h2 id="in-this-ecosystem">In this ecosystem</h2>
+<p>purerl is the scheduling substrate for <strong>purerl-tidal</strong>
+— TidalCycles ported to PureScript/Erlang, with live supervision of a
+per-voice tree.</p>
+  </main>
+</body>
+</html>

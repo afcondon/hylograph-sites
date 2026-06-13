@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>purescript-native — C++ — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="purescript-native--c">purescript-native — C++</h1>
+<p class="meta-row"><strong>Target:</strong> native C++ (and a Go variant) ·
+<strong>Lineage:</strong> source-emitter ·
+<strong>By:</strong> Andy Arvanitis ·
+<strong>Status:</strong> established ·
+<strong>Repo:</strong> <a href="https://github.com/andyarvanitis/purescript-native">andyarvanitis/purescript-native</a></p>
+
+<p>The long-standing native backend — PureScript to C++, with a
+companion Go target and an FFI (<code>go-ffi</code>). It borrows
+<strong>native compilation</strong>: no VM, direct machine code, C/C++
+interop.</p>
+<p>Note: our own <a href="psgo/">psgo</a> is a <em>separate,
+from-scratch</em> Go emitter — distinct from this project's Go variant.
+The local clone of <code>purescript-native</code> is the reference for
+the Go column's FFI conventions, though <code>go-ffi</code> tracks an
+older core-library era, so expect the <em>least</em> coverage here —
+each gap is a "library coverage" data point for the matrix.</p>
+<blockquote>
+<p>This page is a stub — a candidate full column. Semantic divergences
+(Int is 64-bit, UTF-8 strings, strconv-based float formatting) to be
+filled from observed facts.</p>
+</blockquote>
+  </main>
+</body>
+</html>

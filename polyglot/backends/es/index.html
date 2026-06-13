@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>purs-backend-es — optimizing JavaScript — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="purs-backend-es--optimizing-javascript">purs-backend-es —
+optimizing JavaScript</h1>
+<p class="meta-row"><strong>Target:</strong> JavaScript (ES modules) ·
+<strong>Lineage:</strong> optimizer-IR consumer (flagship) ·
+<strong>By:</strong> Nathan Faubion / Arista ·
+<strong>Status:</strong> production ·
+<strong>Repo:</strong> <a href="https://github.com/aristanetworks/purescript-backend-optimizer">aristanetworks/purescript-backend-optimizer</a></p>
+
+<p><code>purs-backend-es</code> is the flagship consumer of <a
+href="https://github.com/aristanetworks/purescript-backend-optimizer"><code>purescript-backend-optimizer</code></a>
+— a separate, backend-agnostic tool that emits an optimized IR
+(uncurrying, inlining) for downstream backends. Same <em>habitat</em> as
+the reference JS backend, <strong>different generator</strong>: it
+produces more aggressively optimized JavaScript.</p>
+<p>That makes it the natural <strong>control column</strong> for the
+matrix — it isolates "what does the shared optimizer IR buy you?" from
+"what does changing runtime buy you?". Several other backends
+(purs-backend-erl, purescm) consume the same IR.</p>
+<blockquote>
+<p>This page is a stub. Belongs on the matrix as a control column
+alongside the two reference-JS habitats.</p>
+</blockquote>
+  </main>
+</body>
+</html>

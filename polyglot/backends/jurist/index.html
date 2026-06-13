@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jurist — Julia — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="jurist--julia">Jurist — Julia</h1>
+<p class="meta-row"><strong>Target:</strong> Julia ·
+<strong>Lineage:</strong> CoreFn-JSON source-emitter (<code>purejl</code>, Haskell) ·
+<strong>By:</strong> this project ·
+<strong>Status:</strong> experimental — 422/426 differential parity ·
+<strong>Repo:</strong> in-ecosystem (<code>purescript-backends/purescript-julia</code>)</p>
+
+<p>Jurist borrows <strong>Julia's numeric stack</strong> — the JIT, the
+array ecosystem, DiffEq / DynamicalSystems / Catlab. The design role is
+a <em>leaf service</em>: PureScript as a typed thin skin over hot
+numeric kernels that live in Julia FFI leaves. Its divergences follow
+the family philosophy — take the host's better number and string types,
+document the seam, and prove everything else identical with a
+differential suite.</p>
+<p>It is the reference implementation of this whole column-adding
+process; the differential harness currently lives in its
+<code>test-suite/</code>.</p>
+<h2 id="at-a-glance">At a glance</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Jurist</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functions</strong></td>
+<td>curried unary closures, <code>(f)(x)(y)</code></td>
+</tr>
+<tr>
+<td><strong>ADT values</strong></td>
+<td>tag-tuples: <code>("Just", x)</code>, tag at <code>[1]</code></td>
+</tr>
+<tr>
+<td><strong>Records</strong></td>
+<td><code>Dict{String,Any}</code> + <code>merge</code></td>
+</tr>
+<tr>
+<td><strong>Typeclass dictionaries</strong></td>
+<td><code>Dict{String,Any}</code> keyed by member name</td>
+</tr>
+<tr>
+<td><strong>Int</strong></td>
+<td><strong>Int64</strong> (Bits/pow apply JS <code>ToInt32</code>)</td>
+</tr>
+<tr>
+<td><strong>Number</strong></td>
+<td>Float64; <code>show</code> reproduces JS <code>toString</code>
+placement rules</td>
+</tr>
+<tr>
+<td><strong>Strings</strong></td>
+<td>UTF-8 <code>String</code>; CodeUnits API is codepoint-based
+(BMP-identical)</td>
+</tr>
+<tr>
+<td><strong>TCO</strong></td>
+<td>trampoline mirroring purs's optimizer (verified 10⁸)</td>
+</tr>
+<tr>
+<td><strong>Lazy bindings</strong></td>
+<td><code>_runtime_lazy</code> thunks, smart Rec partition</td>
+</tr>
+<tr>
+<td><strong>Native niche</strong></td>
+<td>numerics — hot kernels in Julia FFI leaves; PS as typed skin</td>
+</tr>
+<tr>
+<td><strong>Perf shape</strong></td>
+<td>curried-Dict glue ~325 ns/iter (measured); numerics behind the FFI
+seam</td>
+</tr>
+</tbody>
+</table>
+<h2 id="divergences">Divergences</h2>
+<p><strong>422 of 426</strong> differential tests are byte-identical to
+the JS reference, with <strong>4 documented divergences</strong>.
+<code>Int</code> is Int64 (so <code>INT64-</code> tests give exact
+answers like the other non-JS backends); strings are UTF-8 codepoints
+(<code>ASTRAL-</code> tests agree with BEAM/Python). The
+<code>Number</code> <code>show</code> path reimplements JS's
+<code>toString</code> placement rules exactly.</p>
+<h2 id="in-this-ecosystem">In this ecosystem</h2>
+<p>Jurist is the compute-leaf backend for Hylograph (Marginalia 219) —
+numeric work pushed behind a typed FFI seam while the visualization
+layer stays in JS.</p>
+  </main>
+</body>
+</html>

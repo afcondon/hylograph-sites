@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>purescript-backend-wasm — Wasm GC — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="purescript-backend-wasm--wasm-gc">purescript-backend-wasm — Wasm
+GC</h1>
+<p class="meta-row"><strong>Target:</strong> WebAssembly GC (via Binaryen) ·
+<strong>Lineage:</strong> consumes CoreFn JSON + <code>externs.cbor</code> ·
+<strong>By:</strong> katsujukou ·
+<strong>Status:</strong> experimental, advancing fast ·
+<strong>Repo:</strong> <a href="https://github.com/katsujukou/purescript-backend-wasm">katsujukou/purescript-backend-wasm</a> <em>(verify before publish)</em></p>
+
+<p>The novel case in the family. Where every other backend borrows a
+<em>habitat</em> virtue, the Wasm backend borrows a <em>substrate</em>
+virtue — Wasm GC structs, sandboxing, portability — and competes
+<strong>in the same habitat as JS</strong>, beating V8's own JS output
+<em>on V8 itself</em>. It is the first family member whose
+differentiation is <strong>performance, not habitat</strong>.</p>
+<p>The compiler is itself <strong>written in PureScript</strong>,
+driving the Binaryen JS API. It is the best-documented backend in the
+family: 25 ADRs, CI, in-repo benchmarks — a methodology the rest of the
+family is adopting.</p>
+<h2 id="how-it-wins">How it wins</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>purescript-backend-wasm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functions</strong></td>
+<td>uniform <code>eqref</code> calling convention;
+partial/over-application; aggressive inlining + higher-order
+specialization</td>
+</tr>
+<tr>
+<td><strong>ADT values</strong></td>
+<td>struct <em>subtypes</em> of a tag-only <code>$Data</code> base;
+enum-like ADTs as unboxed <code>i31</code>; scalar fields unboxed
+in-struct</td>
+</tr>
+<tr>
+<td><strong>Records</strong></td>
+<td><code>$Rec</code> struct of parallel arrays: interned label-ids +
+values; polymorphic update</td>
+</tr>
+<tr>
+<td><strong>Typeclass dictionaries</strong></td>
+<td><strong>eliminated</strong> — positional specialization
+(ADR-0007)</td>
+</tr>
+<tr>
+<td><strong>Int / Number</strong></td>
+<td>true <code>i32</code> / <code>f64</code>, boxed then <strong>unboxed
+by the optimizer</strong></td>
+</tr>
+<tr>
+<td><strong>Strings</strong></td>
+<td>UTF-8 bytes in a Wasm GC array</td>
+</tr>
+<tr>
+<td><strong>Effect</strong></td>
+<td>native lowering → constant-stack loops; whole-program purity
+analysis</td>
+</tr>
+<tr>
+<td><strong>TCO</strong></td>
+<td>tail-call elimination in codegen; survives recursion where both JS
+backends overflow</td>
+</tr>
+<tr>
+<td><strong>Perf shape</strong></td>
+<td>fastest of three on every benchmark; <strong>5–8× JS</strong> on
+allocation/pattern-match-heavy, <strong>~1.6×</strong> on arithmetic
+(steady-state)</td>
+</tr>
+</tbody>
+</table>
+<p>The performance comes from <em>representation</em>: unboxed scalars,
+struct-subtyped ADTs, and eliminated dictionaries via positional
+specialization.</p>
+<h2 id="inputs--coverage">Inputs &amp; coverage</h2>
+<p>It consumes CoreFn JSON <strong>and</strong>
+<code>externs.cbor</code>, reconstructing foreign signatures from
+externs for boundary marshalling (ADR-0016). The curated
+<code>ulib/</code> FFI covers a <em>subset</em> of the core libraries
+(Array / Eq / Ord / Show / Foldable / Functor / Int / CodeUnits, …) —
+the differential matrix is allowed holes here; silent shrinkage is the
+only failure.</p>
+<h2 id="divergences">Divergences</h2>
+<p>Few in principle. <code>Int</code> is true i32 (JS-aligned), so
+<code>INT64-</code> tests should match <strong>JS</strong>, not the
+bignum backends. Strings are UTF-8 internally but the CodeUnits API
+semantics want differential discovery; <code>Number</code> formatting at
+the JS boundary is worth probing early.</p>
+<h2 id="what-to-learn-from-it">What to learn from it</h2>
+<p>ADR discipline, externs-driven typed FFI marshalling, and a benchmark
+methodology — the same source timed across three code generators,
+post-warmup, graphs in-repo. That <em>is</em> this site's "run the same
+program everywhere" strip, already practiced.</p>
+  </main>
+</body>
+</html>

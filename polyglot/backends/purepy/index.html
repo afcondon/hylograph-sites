@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>purepy — Python — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/#backends">&larr; All backends</a>
+<h1 id="purepy--python">purepy — Python</h1>
+<p class="meta-row"><strong>Target:</strong> Python ·
+<strong>Lineage:</strong> CoreFn-JSON source-emitter (Jurist architecture) ·
+<strong>By:</strong> this project (Claude-authored, afc-maintained) ·
+<strong>Status:</strong> 422/426 differential parity ·
+<strong>Repo:</strong> in-ecosystem (<code>purescript-backends/purescript-python-new</code>)</p>
+
+<p>purepy borrows Python's <strong>ubiquity and data tooling</strong> —
+the inverse argument to most of the family: the libraries are the reason
+to be there. Rebooted from scratch on the Jurist architecture
+(ADR-0001), it reached <strong>422/426 byte-identical</strong> — the
+same score as Jurist on the shared corpus.</p>
+<p>The one structural twist is <strong>module-level lambda
+lifting</strong> (ADR-0002), needed to clear CPython's
+parenthesis-nesting cap that deeply curried code would otherwise
+blow.</p>
+<h2 id="at-a-glance">At a glance</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>purepy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Int</strong></td>
+<td>Python bignum</td>
+</tr>
+<tr>
+<td><strong>Strings</strong></td>
+<td><code>str</code> — Unicode codepoints</td>
+</tr>
+<tr>
+<td><strong>Architecture</strong></td>
+<td>Jurist skeleton + module-level lambda lifting</td>
+</tr>
+<tr>
+<td><strong>Build</strong></td>
+<td>spago with <code>backend.cmd: "true"</code> for CoreFn, then
+<code>purepy output output-py</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="divergences">Divergences</h2>
+<p>Diverges from JS exactly like the other bignum/UTF-8 backends
+(<code>INT64</code> / <code>ASTRAL</code> ledger): Python
+<code>int</code> is arbitrary precision, so <code>sumTo 1000000</code>
+gives the exact answer; float repr differs from JS in the usual zones
+(<code>inf</code> vs <code>Infinity</code> if unshimmed);
+<code>ASTRAL-</code> tests agree with Julia and BEAM. Its own
+<code>test-project/cross_backend_test.py</code> is the prior art for the
+column-adding task, with a curated KNOWN_DIVERGENCES set worth
+porting.</p>
+  </main>
+</body>
+</html>

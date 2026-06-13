@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing a PureScript backend — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/">&larr; Polyglot PureScript</a>
+<h1 id="writing-a-purescript-backend">Writing a PureScript backend</h1>
+<p>PureScript's compiler emits <strong>CoreFn</strong> — a small,
+untyped, functional intermediate representation — and hands it off.
+Everything downstream is a backend: a program that reads CoreFn (as
+JSON, or via the compiler's own plumbing) and produces code for some
+other runtime. This page collects everything we've gathered building
+columns for the differential matrix — the contract, the rules that cost
+us time, and the prior-art shelf.</p>
+<blockquote>
+<p>Counterexamples are first-class content. The thesis of this whole
+project is that divergences between backends are <em>enumerable</em>.
+Finding one is a result, not an embarrassment.</p>
+</blockquote>
+<h2 id="the-three-lineages">The three lineages</h2>
+<p>Backends sort into three families, and the lineage predicts what a
+backend can cheaply do:</p>
+<ul>
+<li><strong>Compiler-integrated</strong> — runs its own PureScript
+frontend and carries its own optimizer (e.g. <code>purerl</code>).</li>
+<li><strong>CoreFn-JSON source-emitters</strong> — consume
+<code>purs</code>'s CoreFn JSON and print target source directly
+(Jurist, purepy, psgo, purescript-native, lua).</li>
+<li><strong>Optimizer-IR consumers</strong> — consume the optimized IR
+from <a
+href="https://github.com/aristanetworks/purescript-backend-optimizer"><code>purescript-backend-optimizer</code></a>
+(uncurrying, inlining) rather than rolling their own (purs-backend-es,
+purescript-backend-erl, purescm).</li>
+</ul>
+<p>Whole-program <strong>monomorphisation</strong> lives naturally on
+the optimizer-IR path, so a performance-oriented backend tends to sit
+there. The Wasm GC backend is an outlier — it consumes CoreFn
+<em>and</em> <code>externs.cbor</code> to reconstruct foreign signatures
+for boundary marshalling.</p>
+<h2 id="the-contract">The contract</h2>
+<p>"Adding a backend" to the differential suite means, concretely:</p>
+<ol type="1">
+<li><strong>Build path</strong> — compile the suite's
+<code>Test/*.purs</code> modules to runnable artifacts on your backend.
+The suite is deliberately FFI-free beyond the core libraries, so the
+only foreign code you need is your backend's own core-library
+shims.</li>
+<li><strong>Runner</strong> — a pure subprocess
+<code>run_&lt;backend&gt;(module) -&gt; (stdout, error)</code>, plus the
+module-name mapping. No shared state.</li>
+<li><strong>Divergence curation</strong> — every non-identical line is
+either a fix (your shim is wrong) or a <code>KNOWN_DIVERGENCES</code>
+entry with a prefix naming the cause (<code>INT64-</code>,
+<code>ASTRAL-</code>, <code>BIGNUM-</code>, <code>FLOATFMT-</code>, …)
+<em>and</em> a sentence in your README. An uncurated divergence is a
+failure.</li>
+<li><strong>Results as data</strong> — one JSONL record per (program,
+backend, test). The site renders from this; don't emit prose summaries
+only.</li>
+<li><strong>Regression</strong> — the existing columns must still
+pass.</li>
+</ol>
+<h2 id="ground-rules-learned-the-hard-way">Ground rules (learned the
+hard way)</h2>
+<ul>
+<li><strong>Read the real JS foreign modules</strong>
+(<code>.spago/p/&lt;pkg&gt;/src/**/*.js</code>), never another backend's
+shims. The <code>.js</code> file is the spec; the
+<code>foreign import</code> declarations give you arities.</li>
+<li><strong>JS arity tolerance does not port.</strong> JS foreigns call
+<code>f()</code> on functions CoreFn types as 1-ary. Your shim must pass
+the argument explicitly. Grep the JS for zero-arg calls.</li>
+<li><strong>Some "foreign-looking" names are
+PureScript-defined.</strong> <code>mkFn1</code>/<code>runFn1</code> are
+written in PureScript; shimming them collides with the generated module
+body. Trust the <code>corefn.json</code> <code>foreign</code> array,
+nothing else.</li>
+<li><strong>The reference is not always right.</strong>
+<code>sumTo 0 1000000</code> overflows on the JS backend (int32 wrap).
+When your backend's answer is better, document the divergence — don't
+cripple your runtime to match.</li>
+<li><strong>Number formatting is the biggest hidden surface.</strong> JS
+<code>Number.prototype.toString</code> placement rules (decimal within
+1e-6 ≤ |n| &lt; 1e21, exponential outside, <code>.0</code> suffix via
+Show) have to be reimplemented on every backend. Run
+<code>Test.Numbers</code> early.</li>
+<li><strong>Sort stability is tested.</strong> JS
+<code>sortByImpl</code> is a stable merge sort. Check what your
+backend's shim actually does.</li>
+<li><strong>Watch inverted sign conventions.</strong>
+<code>ordArrayImpl</code>'s length tiebreak is inverted (the PureScript
+caller re-inverts). Any foreign whose sign is consumed inverted is a
+trap.</li>
+<li><strong>Reuse stack snapshots.</strong> For Haskell-based backends,
+copy <code>stack.yaml</code> <em>and</em> <code>stack.yaml.lock</code>
+from a sibling that already builds — the lock pins the snapshot key.
+Without it, ~25 min rebuild; with it, ~90 s.</li>
+</ul>
+<h2 id="the-differential-suite">The differential suite</h2>
+<p>The harness diffs every backend against the reference (JS)
+<strong>and</strong> pairwise where both diverge the same way — bignum
+backends should agree with <em>each other</em>, which is itself a
+checkable claim. The registry of backends is the clean extension
+point:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>BACKENDS <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;js&quot;</span>:     Backend(build<span class="op">=</span>build_js,     run<span class="op">=</span>run_js, ref<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;julia&quot;</span>:  Backend(build<span class="op">=</span>build_julia,  run<span class="op">=</span>run_julia),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;erl&quot;</span>:    Backend(build<span class="op">=</span>build_erl,    run<span class="op">=</span>run_erl),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># default: all available — probe toolchains, skip missing with a</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># SKIPPED record, never a silent drop.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><code>KNOWN_DIVERGENCES</code> is keyed
+<code>(module, test) -&gt; {backend_or_class: expected}</code>, where
+divergence <em>classes</em> (<code>bignum</code>, <code>utf8</code>)
+beat per-backend entries wherever they apply.</p>
+<h2 id="prior-art-shelf">Prior-art shelf</h2>
+<ul>
+<li><strong>The comparison</strong> — <a href="/#backends">the backend
+family</a>, one page each, with the semantic divergence table.</li>
+<li><strong>Reference implementation of the column-adding
+process</strong> — Jurist's <code>test-suite/</code> (the harness
+currently lives there; generalizing it into this repo is part of the
+site build).</li>
+<li><strong>purepy's <code>cross_backend_test.py</code></strong> — prior
+art for this exact task, with a curated KNOWN_DIVERGENCES set worth
+porting rather than rediscovering.</li>
+<li><strong>katsujukou's Wasm backend</strong> — the best-documented in
+the family (25 ADRs, CI, benchmarks). Adopt its <strong>ADR
+discipline</strong>, its <strong>externs.cbor signature
+reconstruction</strong> for typed FFI marshalling, and its
+<strong>benchmark methodology</strong> (same source, timed across
+generators, steady-state).</li>
+<li><a
+href="https://github.com/aristanetworks/purescript-backend-optimizer"><code>purescript-backend-optimizer</code></a>
+— the shared optimization IR, if you're building an optimizer-IR
+consumer.</li>
+</ul>
+<h2 id="definition-of-done">Definition of done</h2>
+<ul>
+<li>All suite modules run on the new backend; counts reported.</li>
+<li>Zero uncurated divergences; every curated one has a prefix, a
+per-backend (or per-class) expectation, and a README sentence.</li>
+<li>JSONL results emitted; existing columns still green.</li>
+<li>The comparison table column updated from <em>observed facts</em>,
+not documentation folklore — cite test names where the table makes a
+checkable claim.</li>
+</ul>
+  </main>
+</body>
+</html>
