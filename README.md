@@ -14,7 +14,7 @@ Renamed from `hylograph-sites` on 2026-04-24 to reflect its actual role (it hold
 | `andrewcondon/` | andrewcondon.com (+ andrewcondon.pages.dev) | `andrewcondon` | ✗ (manual wrangler) | #232 |
 | `heresiarch/` | heresiarch.com | `heresiarch` | ✗ (manual wrangler) | #233 |
 | `signal-box/` | signal-box.hylograph.net | `signal-box` ¹ | TBD ¹ | #234 |
-| `widgets/` | widgets.hylograph.net ² | `hylograph-widgets` | ✗ (manual wrangler) | TBD |
+| `widgets/` | widgets.hylograph.net ² | `hylograph-widgets` | ✗ (manual wrangler) | #244 |
 
 ¹ signal-box is the Polyglot flagship demo ("Make Illegal States Unrepresentable", static, five pages). Its CF project name and git-connected status are assumed/unconfirmed — verify before relying on them.
 
