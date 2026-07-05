@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The spec language — Liquid PureScript</title>
+  <meta name="description" content="The .lps refinement language by example: refined base types, dependent binders across arguments, assume specs for trusted imports, and data/measure declarations for inductive reasoning.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <a href="index.html" class="wordmark">Liquid PureScript <span class="lpsq">· lps</span></a>
+    <span class="colophon">Refinement types · external tool · Z3</span>
+  </header>
+
+  <nav class="page-nav">
+    <a href="index.html">Overview</a>
+    <a href="how-it-works.html">How it works</a>
+    <span class="current">The spec language</span>
+    <a href="verdicts.html">Verdicts</a>
+    <a href="roadmap.html">Roadmap</a>
+    <a class="repo" href="https://github.com/afcondon/liquid-purescript">GitHub ↗</a>
+  </nav>
+
+  <p class="kicker">The spec language</p>
+  <h1 class="title">A small language for saying <em>which</em> value.</h1>
+  <p class="lede">
+    An <code>.lps</code> file is a list of declarations: type aliases, function
+    specs, trusted <code>assume</code> specs, and <code>data</code> /
+    <code>measure</code> declarations. The refinement logic stays inside a
+    decidable fragment on purpose — non-linear arithmetic is rejected at
+    parse time, so Z3 is always a decision procedure.
+  </p>
+
+  <!-- ── Grammar ────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">01</span>The grammar</h2>
+    <table class="grammar">
+      <tr><td class="lhs">specfile</td><td class="rhs"><code>::= { decl }</code></td></tr>
+      <tr><td class="lhs">decl</td><td class="rhs"><code>::= "type" CONID [ vars ] "=" rtype</code> &nbsp;— alias<br>
+        <code>&nbsp;| VARID "::" fnspec</code> &nbsp;— function spec<br>
+        <code>&nbsp;| "assume" VARID "::" fnspec</code> &nbsp;— trusted spec<br>
+        <code>&nbsp;| "data" CONID "=" ctors</code> &nbsp;— datatype<br>
+        <code>&nbsp;| "measure" VARID "::" … + equations</code> &nbsp;— measure</td></tr>
+      <tr><td class="lhs">fnspec</td><td class="rhs"><code>::= rtype { "->" rtype }</code></td></tr>
+      <tr><td class="lhs">rtype</td><td class="rhs"><code>::= "{" VARID ":" base "|" pred "}"</code> &nbsp;— refined base<br>
+        <code>&nbsp;| base</code> &nbsp;— unrefined (pred = true)<br>
+        <code>&nbsp;| CONID</code> &nbsp;— alias reference</td></tr>
+      <tr><td class="lhs">base</td><td class="rhs"><code>::= "Int" | "Boolean" | CONID</code> &nbsp;(datatype) <code>| "Array"</code></td></tr>
+      <tr><td class="lhs">pred</td><td class="rhs"><code>::= pred ("&&" | "||") pred | "not" pred | "(" pred ")"</code><br>
+        <code>&nbsp;| term ("==" | "/=" | "<" | "<=" | ">" | ">=") term</code><br>
+        <code>&nbsp;| "true" | "false"</code></td></tr>
+      <tr><td class="lhs">term</td><td class="rhs"><code>::= term ("+" | "-") term | term "*" term</code> &nbsp;(literal·var only)<br>
+        <code>&nbsp;| INT | VARID | measure-app | "(" term ")"</code></td></tr>
+    </table>
+    <p class="caption" style="margin-top:0.9rem">
+      The slice logic is <strong>QF_LIA + Bool</strong>; multiplication of two
+      variables is rejected when the spec is parsed. Measures widen it to
+      <strong>QF_UFLIA</strong> — the “UF” is the uninterpreted measure function.
+    </p>
+  </section>
+
+  <!-- ── Refined base types ─────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">02</span>Refined base types</h2>
+    <p>A refinement is a base type, a binder, and a predicate the value must
+      satisfy. Name it once with <code>type</code>, reuse it everywhere.</p>
+    <pre><code>type Nat = { v : Int | v >= 0 }
+
+abs  :: Int -> Nat
+sign :: Int -> { s : Int | 0 - 1 <= s && s <= 1 }
+flag :: { n : Int | n >= 0 } -> { b : Boolean | b }</code></pre>
+    <p class="caption" style="margin-top:0.7rem"><code>abs</code> and
+      <code>sign</code> prove SAFE; <code>flag</code> shows a refinement on a
+      <code>Boolean</code> result — the returned bool must be <code>true</code>
+      whenever the argument is non-negative.</p>
+  </section>
+
+  <!-- ── Dependent binders ──────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">03</span>Dependent binders</h2>
+    <p class="wide">Argument names in a spec are binding positions: an earlier
+      argument's binder is in scope in every later refinement. This is how a spec
+      states a relationship <em>between</em> arguments.</p>
+    <pre><code>myDiv :: Int -> { d : Int | d /= 0 } -> Int
+
+clamp :: { lo : Int }
+      -> { hi : Int | hi >= lo }              -- hi related to lo
+      -> Int
+      -> { v : Int | v >= lo && v <= hi }     -- result related to both</code></pre>
+    <p class="caption" style="margin-top:0.7rem"><code>clamp</code> proves SAFE:
+      under <code>hi &gt;= lo</code>, every branch of the body lands in
+      <code>[lo, hi]</code>.</p>
+  </section>
+
+  <!-- ── assume ─────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">04</span><code>assume</code> — trusted specs</h2>
+    <p class="wide">
+      Imported and FFI functions have no CoreFn body to check. An
+      <code>assume</code> declaration states a spec that is <strong>taken on
+      faith</strong> — the tool trusts it and uses it at call sites, but never
+      verifies it. It is an axiom you are choosing to add.
+    </p>
+    <pre><code>-- trusted spec for a floated class method, used to discharge call sites
+assume min :: { a : Int }
+           -> { b : Int }
+           -> { v : Int | (v <= a && v <= b) && (v == a || v == b) }</code></pre>
+    <div class="note-box">
+      <p style="margin:0"><strong>Trust is explicit and visible.</strong> Shared
+      corpora of <code>assume</code> specs live in <code>.lps</code> files you
+      prepend with <code>--include</code>; <code>lib/prelude.lps</code> seeds
+      <code>min</code> / <code>max</code> / <code>abs</code> /
+      <code>signum</code> / <code>clamp</code> on <code>Int</code>. Nothing is
+      trusted that you didn't write down.</p>
+    </div>
+  </section>
+
+  <!-- ── data / measure ─────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">05</span><code>data</code> and <code>measure</code> — reasoning about structure</h2>
+    <p class="wide">
+      To reason about a user datatype, declare its shape and a
+      <em>measure</em>: a logic-level function from the datatype to a number,
+      with one equation per constructor. The verifier treats the datatype as an
+      opaque sort and reasons inductively about constructors.
+    </p>
+    <pre><code>data IntList = INil | ICons Int IntList
+
+measure len :: IntList -> { v : Int | v >= 0 }
+  INil       = 0
+  ICons x xs = 1 + len xs
+
+count  :: { l : IntList } -> { v : Int | v == len l }
+append :: { a : IntList } -> { b : IntList }
+       -> { v : IntList | len v == len a + len b }
+singleton :: Int -> { v : IntList | len v == 1 }</code></pre>
+    <p class="caption" style="margin-top:0.7rem">
+      All three prove: <code>count</code> by assuming its own spec at the
+      recursive call; <code>append</code> through constructor-application facts;
+      <code>singleton</code> through nested constructor applications. Drop the
+      <code>+ 1</code> from a would-be <code>count</code> and it refutes with a
+      countermodel over the uninterpreted sort.
+    </p>
+
+    <h3>Arrays come built in</h3>
+    <p class="wide">
+      <code>Array</code> is a built-in element-erased datatype with a built-in
+      <code>length</code> measure — only the length is visible to the logic.
+      Array literals contribute exact lengths, and
+      <code>lib/arrays.lps</code> supplies trusted specs for
+      <code>length</code> / <code>cons</code> / <code>snoc</code> /
+      <code>take</code> / <code>drop</code>.
+    </p>
+    <pre><code>-- a valid index into a non-empty array
+mid :: { xs : Array | length xs > 0 }
+    -> { v : Int | v >= 0 && v < length xs }</code></pre>
+    <p class="caption" style="margin-top:0.7rem">
+      <code>mid xs = length xs / 2</code> proves under the non-empty
+      precondition; the same body <em>without</em> it — <code>badMid</code> —
+      refutes with the empty array. See them both on the
+      <a href="verdicts.html">verdicts</a> page.
+    </p>
+  </section>
+
+  <footer>
+    <span>Every construct here is a runnable example in <code>examples/src/</code>.</span>
+    <span><a href="https://github.com/afcondon/liquid-purescript">github.com/afcondon/liquid-purescript</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

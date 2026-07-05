@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verdicts — Liquid PureScript</title>
+  <meta name="description" content="The full golden verdict table: every example function with its SAFE, UNSAFE (with counterexample), or UNSUPPORTED verdict, grouped by module in escalating order.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <a href="index.html" class="wordmark">Liquid PureScript <span class="lpsq">· lps</span></a>
+    <span class="colophon">Refinement types · external tool · Z3</span>
+  </header>
+
+  <nav class="page-nav">
+    <a href="index.html">Overview</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="language.html">The spec language</a>
+    <span class="current">Verdicts</span>
+    <a href="roadmap.html">Roadmap</a>
+    <a class="repo" href="https://github.com/afcondon/liquid-purescript">GitHub ↗</a>
+  </nav>
+
+  <p class="kicker">Verdicts</p>
+  <h1 class="title">The whole golden table, current.</h1>
+  <p class="lede">
+    This is <code>test/golden.txt</code> — every function in the example
+    corpus, run on every build. SAFE and UNSAFE cases in near-equal measure,
+    on purpose: a verifier that says SAFE to everything must fail loudly here.
+    The four modules escalate — basics, composition, inductive data, arrays.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><span class="n green">22</span><span class="l">SAFE</span></div>
+    <div class="stat"><span class="n red">4</span><span class="l">UNSAFE — with counterexample</span></div>
+    <div class="stat"><span class="n">1</span><span class="l">UNSUPPORTED — deliberate mismatch</span></div>
+    <div class="stat"><span class="n">4</span><span class="l">Modules</span></div>
+  </div>
+
+  <!-- ── Demo ───────────────────────────────────────────────── -->
+  <section class="module-block">
+    <div class="module-head"><h3>Demo</h3><span class="file">basics + counterexamples · Demo.purs / Demo.lps</span></div>
+    <table class="verdicts">
+      <tr><td class="fn"><code>abs</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Both branches land in <code>Nat</code>.</td></tr>
+      <tr><td class="fn"><code>sign</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Guards + <code>otherwise</code>; result stays in <code>[-1, 1]</code>.</td></tr>
+      <tr><td class="fn"><code>double</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>let m = n + n</code> — the bind enters the context as an equality.</td></tr>
+      <tr><td class="fn"><code>clamp</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Dependent spec across binders: result in <code>[lo, hi]</code>.</td></tr>
+      <tr><td class="fn"><code>low</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>min n 0 &lt;= 0</code> — discharged once the corpus supplies <code>min</code>'s spec.</td></tr>
+      <tr><td class="fn"><code>flag</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Boolean-result refinement: returns <code>true</code> when <code>n &gt;= 0</code>.</td></tr>
+      <tr><td class="fn"><code>bad</code></td><td class="vb"><span class="badge unsafe">Unsafe</span></td><td class="note"><code>bad n = n - 1</code> is not always <code>&gt;= 0</code>. <span class="cx">at Demo.purs:9:9 · counterexample: n = 0</span></td></tr>
+      <tr><td class="fn"><code>once</code></td><td class="vb"><span class="badge unknown">Unsupported</span></td><td class="note">Deliberate spec/type mismatch — the spec declares 2 arguments, the type has 1. Caught by the <code>docs.json</code> cross-check <em>before</em> solving.</td></tr>
+    </table>
+  </section>
+
+  <!-- ── P1 ─────────────────────────────────────────────────── -->
+  <section class="module-block">
+    <div class="module-head"><h3>P1</h3><span class="file">compositional — call sites, recursion, assume · P1.purs / P1.lps</span></div>
+    <table class="verdicts">
+      <tr><td class="fn"><code>myAbs</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">The reusable <code>Nat</code>-returning absolute value.</td></tr>
+      <tr><td class="fn"><code>dist</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Calls <code>myAbs</code>; its postcondition is assumed at the site.</td></tr>
+      <tr><td class="fn"><code>sumTo</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Recursion — the recursive call assumes <code>sumTo</code>'s own spec.</td></tr>
+      <tr><td class="fn"><code>inc</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Precondition <code>n &gt;= 0</code> ⇒ result <code>&gt;= 1</code>.</td></tr>
+      <tr><td class="fn"><code>callGood</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>inc (myAbs n)</code> — <code>myAbs</code>'s postcondition discharges <code>inc</code>'s precondition.</td></tr>
+      <tr><td class="fn"><code>low2</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>min n 0 &lt;= 0</code>, via the trusted <code>min</code> spec.</td></tr>
+      <tr><td class="fn"><code>size</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Multi-alternative <code>case</code> on <code>Int</code> literals; result in <code>[0, 2]</code>.</td></tr>
+      <tr><td class="fn"><code>callBad</code></td><td class="vb"><span class="badge unsafe">Unsafe</span></td><td class="note"><code>inc n</code> without <code>myAbs</code> — <code>n</code> may be negative, so <code>inc</code>'s precondition fails at the call site. <span class="cx">at P1.purs:21:13 · counterexample: n = -1</span></td></tr>
+    </table>
+  </section>
+
+  <!-- ── P2 ─────────────────────────────────────────────────── -->
+  <section class="module-block">
+    <div class="module-head"><h3>P2</h3><span class="file">inductive ADTs via measures · P2.purs / P2.lps</span></div>
+    <table class="verdicts">
+      <tr><td class="fn"><code>count</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Proves <code>count l == len l</code> by induction (own-spec recursion).</td></tr>
+      <tr><td class="fn"><code>append</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Proves <code>len (append a b) == len a + len b</code> via constructor facts.</td></tr>
+      <tr><td class="fn"><code>singleton</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>len (ICons x INil) == 1</code> through nested constructor applications.</td></tr>
+      <tr><td class="fn"><code>headOr</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Total head — the <code>INil</code> case supplies the default.</td></tr>
+      <tr><td class="fn"><code>badCount</code></td><td class="vb"><span class="badge unsafe">Unsafe</span></td><td class="note">Forgets the <code>+ 1</code>, so the count can't equal <code>len l</code>. <span class="cx">at P2.purs:21:16 · counterexample: a non-empty list — the dropped step makes the count disagree with the measure</span></td></tr>
+    </table>
+  </section>
+
+  <!-- ── Arrays ─────────────────────────────────────────────── -->
+  <section class="module-block">
+    <div class="module-head"><h3>Arrays</h3><span class="file">built-in length measure + library specs · Arrays.purs / Arrays.lps</span></div>
+    <table class="verdicts">
+      <tr><td class="fn"><code>three</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>[1,2,3]</code> has length exactly 3 — literals contribute exact lengths.</td></tr>
+      <tr><td class="fn"><code>grow</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>cons 0 xs</code> — length grows by one.</td></tr>
+      <tr><td class="fn"><code>mid</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note">Valid index via Euclidean division, under a non-empty precondition.</td></tr>
+      <tr><td class="fn"><code>firstHalf</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>take (length xs / 2) xs</code> — result no longer than <code>xs</code>.</td></tr>
+      <tr><td class="fn"><code>rest</code></td><td class="vb"><span class="badge safe">Safe</span></td><td class="note"><code>drop 1</code> off a non-empty array — length is exactly one less.</td></tr>
+      <tr><td class="fn"><code>badMid</code></td><td class="vb"><span class="badge unsafe">Unsafe</span></td><td class="note">Same body as <code>mid</code> but without the non-empty precondition: <code>badMid [] = 0</code> is not <code>&lt; length []</code>. <span class="cx">at Arrays.purs:18:13 · counterexample: xs = []</span></td></tr>
+    </table>
+  </section>
+
+  <div class="note-box">
+    <p style="margin:0"><strong>Why the failures are the point.</strong> Each
+    UNSAFE case is a working function that would compile and run — it's the
+    <em>refinement</em> it fails, and the tool pins the failing span and hands
+    back an input that breaks it. <code>once</code>, the lone UNSUPPORTED, is a
+    spec that has drifted from its type; the tool refuses to solve rather than
+    guess. Nothing here is a silent pass.</p>
+  </div>
+
+  <footer>
+    <span>Reproduce every row with <code>make test</code> (needs <code>z3</code> on the PATH).</span>
+    <span><a href="https://github.com/afcondon/liquid-purescript">github.com/afcondon/liquid-purescript</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

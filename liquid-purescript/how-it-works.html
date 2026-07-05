@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How it works — Liquid PureScript</title>
+  <meta name="description" content="The Liquid PureScript pipeline: CoreFn plus a spec file become verification conditions, discharged as SMT-LIB2 text by the Z3 binary. Checking-mode semantics for a PureScript reader who doesn't know SMT.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <a href="index.html" class="wordmark">Liquid PureScript <span class="lpsq">· lps</span></a>
+    <span class="colophon">Refinement types · external tool · Z3</span>
+  </header>
+
+  <nav class="page-nav">
+    <a href="index.html">Overview</a>
+    <span class="current">How it works</span>
+    <a href="language.html">The spec language</a>
+    <a href="verdicts.html">Verdicts</a>
+    <a href="roadmap.html">Roadmap</a>
+    <a class="repo" href="https://github.com/afcondon/liquid-purescript">GitHub ↗</a>
+  </nav>
+
+  <p class="kicker">How it works</p>
+  <h1 class="title">CoreFn in, verdicts out.</h1>
+  <p class="lede">
+    No compiler fork, no macros. The verifier reads the CoreFn JSON the
+    PureScript compiler already emits, pairs it with your spec file, and turns
+    each function into a handful of small logical obligations that Z3 either
+    proves or breaks.
+  </p>
+
+  <!-- ── Pipeline ───────────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">01</span>The pipeline</h2>
+    <p class="wide">
+      Two inputs converge. On the left, <code>spago build</code> (with a no-op
+      backend) drops <code>corefn.json</code> for each module. On the right,
+      your <code>.lps</code> file is parsed to a spec. They meet at
+      <strong>Vc</strong>, the verification-condition generator, which walks the
+      code in <em>checking mode</em> and emits obligations. Each obligation
+      becomes SMT-LIB2 text piped to the <code>z3</code> binary.
+    </p>
+
+    <div class="pipeline">
+      <div class="node input"><span class="nm">Demo.purs → corefn.json</span><span class="ds">spago build, backend cmd:&nbsp;"true"</span></div>
+      <div class="node input"><span class="nm">Demo.lps</span><span class="ds">the refinement layer</span></div>
+
+      <div class="node"><span class="nm">CoreFn.Decode</span><span class="ds">JSON → Module (ADT)</span></div>
+      <div class="node"><span class="nm">Spec.Parser</span><span class="ds">.lps text → aliases + fn specs</span></div>
+
+      <div class="node"><span class="nm">Resolve</span><span class="ds">float-alias table → PrimOp per local Var</span></div>
+      <div class="node" style="display:flex;align-items:center;color:var(--muted);border-style:dashed">signatures cross-checked against docs.json</div>
+
+      <div class="flowlabel">↓ &nbsp; both feed &nbsp; ↓</div>
+
+      <div class="node span2"><span class="nm">Vc — verification-condition generator</span><span class="ds">checking-mode traversal of each spec'd decl → [Obligation]&nbsp; where Obligation = { ctx : [Pred], goal : Pred, span }</span></div>
+
+      <div class="node"><span class="nm">Logic.Smt</span><span class="ds">Obligation → SMT-LIB2 text</span></div>
+      <div class="node solver"><span class="nm">Solver.Z3</span><span class="ds">z3 -in · unsat ⇒ SAFE / sat + model ⇒ UNSAFE</span></div>
+
+      <div class="node span2"><span class="nm">Report</span><span class="ds">verdict + source span + countermodel</span></div>
+    </div>
+    <p class="caption" style="margin-top:1rem">
+      Every arrow is a plain ADT-to-ADT function; the only effects are reading
+      files and spawning <code>z3</code>. The SMT boundary is <em>text</em>, so
+      every obligation can be dumped with <code>--smt2-dir</code> and replayed by
+      hand — the same inspectability principle as differential conformance in the
+      backends family.
+    </p>
+  </section>
+
+  <!-- ── Reading CoreFn ─────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">02</span>Why CoreFn, and what Resolve is for</h2>
+    <p class="wide">
+      CoreFn is the compiler's desugared core: <code>if/then/else</code> is
+      already a <code>Case</code>, guards are alternatives, and every node
+      carries a source span. It is also backend-agnostic — the same core the
+      Erlang and other backends consume — so a proof about the core holds for
+      any backend's output.
+    </p>
+    <p class="wide">
+      One wrinkle shapes the design. The compiler <strong>floats type-class
+      methods</strong>: <code>n &gt; 0</code> is not an application of
+      <code>greaterThan</code> at the use site. Instead a synthetic module-local
+      declaration appears —
+      <code>Demo.greaterThan = Data.Ord.greaterThan ordInt</code> — and the use
+      site references that local. <strong>Resolve</strong> scans for that shape
+      and builds a table mapping each local name to a primitive SMT operation
+      (<code>&gt;</code>, <code>+</code>, <code>-</code>, <code>&amp;&amp;</code>,
+      …) for <code>Ord</code>, <code>Ring</code>, <code>Semiring</code>,
+      <code>EuclideanRing</code>, <code>Eq</code>, and
+      <code>HeytingAlgebra</code> on <code>Int</code> / <code>Boolean</code>.
+    </p>
+    <div class="note-box" style="border-left-color:var(--hairline)">
+      <p style="margin:0">Types come from <code>docs.json</code>, not externs —
+      externs are CBOR now, but <code>docs.json</code> carries full type ASTs as
+      JSON. Specs are cross-checked against it: an arity or base-type
+      disagreement fails the function <em>before</em> any solving, so a spec that
+      has drifted from its code is caught as a mismatch, not a false verdict.</p>
+    </div>
+  </section>
+
+  <!-- ── Checking mode ──────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">03</span>Checking mode, for a reader who knows PureScript but not SMT</h2>
+    <p class="wide">
+      Take a spec <code>f :: t1 -&gt; tr</code> and its definition
+      <code>f x = body</code>. The verifier builds a <em>context</em> Γ — a bag
+      of facts it may assume — and asks whether the result refinement must hold.
+    </p>
+    <ol class="wide">
+      <li><strong>Bind the arguments.</strong> Each argument's refinement enters
+        Γ as an assumption. For <code>abs :: Int -&gt; Nat</code>, the argument
+        is unrefined, so Γ starts empty.</li>
+      <li><strong>Walk the body, collecting path conditions.</strong> A
+        <code>Case</code> on a Boolean adds the scrutinee to Γ on the
+        <code>true</code> branch and its negation on the fallback. Guards do the
+        same, each later guard also assuming the earlier ones failed. A
+        non-recursive <code>let</code> binds an equality into Γ.</li>
+      <li><strong>At each leaf</strong> — an expression in tail position — emit an
+        obligation: under Γ, does the result refinement hold with the leaf
+        substituted for the result variable?</li>
+      <li><strong>Discharge it.</strong> One obligation, one Z3 query: assert Γ,
+        assert the <em>negation</em> of the goal, ask <code>check-sat</code>.
+        <span class="badge safe">unsat</span> means the goal can't be broken —
+        SAFE. <span class="badge unsafe">sat</span> hands back a model — a
+        concrete counterexample — UNSAFE.</li>
+    </ol>
+
+    <h3>Worked example: why <code>bad</code> fails</h3>
+    <p><code>bad n = n - 1</code> against <code>Nat = { v : Int | v &gt;= 0 }</code>:</p>
+    <pre><code>Γ            = { }                         -- n is unrefined
+body embeds  = n - 1                        -- Resolve maps Demo.sub to (-)
+obligation   = { } ⊢ (n - 1) >= 0
+SMT          = (declare-const n Int)
+               (assert (not (>= (- n 1) 0)))
+               (check-sat)
+result       = sat,  model  n = 0     →  UNSAFE at Demo.purs:9:9</code></pre>
+    <p>And <code>abs</code>, same result type, produces two obligations — one per
+      branch — <code>n &gt; 0 ⊢ n &gt;= 0</code> and
+      <code>¬(n &gt; 0) ⊢ (0 - n) &gt;= 0</code> — both unsat when negated, so
+      SAFE.</p>
+
+    <div class="two-col" style="margin-top:1.6rem">
+      <div>
+        <h3>Compositional by construction</h3>
+        <p>A call to a spec'd function checks that function's
+        <em>precondition</em> at the call site (an obligation) and assumes its
+        <em>postcondition</em> via a fresh result variable. Recursion assumes the
+        function's own spec — standard inductive reasoning. Call facts are scoped
+        per branch, so a postcondition justified under one path can't leak into a
+        sibling.</p>
+      </div>
+      <div>
+        <h3>Sound, sometimes imprecise</h3>
+        <p>An application of an unknown function, or a <code>let</code> the logic
+        can't embed, becomes a fresh unconstrained variable. The tool may reject
+        good code (imprecision), but it will never bless bad code inside the
+        trusted fragment. The logic stays in <strong>QF_LIA</strong> —
+        quantifier-free linear integer arithmetic — so Z3 is a decision
+        procedure, never a heuristic; “unknown” is not a possible answer.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Bugs worth telling ─────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">04</span>Two bugs worth telling</h2>
+    <p class="wide">The build turned up two failures that are really facts about
+      the boundary being crossed — worth keeping.</p>
+
+    <h3>The parser that ate a keyword</h3>
+    <p class="wide">
+      Adding juxtaposition application to the spec parser (so
+      <code>len xs</code> reads as “apply <code>len</code> to <code>xs</code>”)
+      made the application parser greedy: it happily swallowed the following
+      <code>type</code> keyword as a third argument to a measure. The fix was to
+      make the reserved words actually reserved — the application parser has to
+      stop at a keyword, not consume it. A satisfying bug: the grammar quietly
+      told you where one declaration ends and the next begins.
+    </p>
+
+    <h3><code>Array</code> is spoken for</h3>
+    <p class="wide">
+      The natural SMT sort name for PureScript arrays is <code>Array</code> — but
+      SMT-LIB reserves <code>Array</code> for its own theory of arrays, and Z3
+      rejected the declaration outright. So at the SMT boundary the sort is
+      renamed <code>PSArray</code>; element types are erased and only
+      <code>length</code> is visible to the logic. The lesson generalises: the
+      text boundary to the solver is a foreign namespace, and crossing it means
+      respecting its reserved words.
+    </p>
+  </section>
+
+  <footer>
+    <span>Architecture, semantics, and the six ADRs live in <code>docs/PLAN.md</code>.</span>
+    <span><a href="https://github.com/afcondon/liquid-purescript">github.com/afcondon/liquid-purescript</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

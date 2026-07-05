@@ -15,6 +15,7 @@ Renamed from `hylograph-sites` on 2026-04-24 to reflect its actual role (it hold
 | `heresiarch/` | heresiarch.com | `heresiarch` | ✗ (manual wrangler) | #233 |
 | `signal-box/` | signal-box.hylograph.net | `signal-box` ¹ | TBD ¹ | #234 |
 | `widgets/` | widgets.hylograph.net ² | `hylograph-widgets` | ✗ (manual wrangler) | #244 |
+| `liquid-purescript/` | liquid-purescript.hylograph.net | `liquid-purescript` | ✗ (`quartermaster publish`) | #247 |
 
 ¹ signal-box is the Polyglot flagship demo ("Make Illegal States Unrepresentable", static, five pages). Its CF project name and git-connected status are assumed/unconfirmed — verify before relying on them.
 
@@ -56,6 +57,13 @@ npx wrangler pages deploy heresiarch   --project-name heresiarch
 npx wrangler pages deploy signal-box   --project-name signal-box   # CF project name assumed — see ¹ above
 npx wrangler pages deploy widgets      --project-name hylograph-widgets --branch main --commit-dirty=true
 ```
+
+`liquid-purescript/` deploys through the infrastructure, not raw wrangler — it's
+an `x-bosun.static` site published by **`quartermaster publish`** (ensures the CF
+project, stages a clean artifact, deploys, and attaches the custom domain +
+CNAME). Its `compose.yml`/`registry.json` in the dir are the declaration, not
+served (staging excludes them). See `ShapedSteer/bosun/docs/PUBLISH-A-SITE.md`;
+host-prep is `wrangler login` + a `QM_CF_DNS_TOKEN` (Zone:DNS:Edit on hylograph.net).
 
 The `widgets/` artifact is rebuilt from the showcase in `purescript-hylograph-halogen-ui`:
 

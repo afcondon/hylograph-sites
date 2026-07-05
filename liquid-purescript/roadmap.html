@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roadmap &amp; research — Liquid PureScript</title>
+  <meta name="description" content="The phased roadmap from the first-order slice to higher-order functions and type classes, with dated status, and the soundness-trap test corpus that validates open research without a peer reviewer.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <a href="index.html" class="wordmark">Liquid PureScript <span class="lpsq">· lps</span></a>
+    <span class="colophon">Refinement types · external tool · Z3</span>
+  </header>
+
+  <nav class="page-nav">
+    <a href="index.html">Overview</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="language.html">The spec language</a>
+    <a href="verdicts.html">Verdicts</a>
+    <span class="current">Roadmap</span>
+    <a class="repo" href="https://github.com/afcondon/liquid-purescript">GitHub ↗</a>
+  </nav>
+
+  <p class="kicker">Roadmap &amp; research</p>
+  <h1 class="title">A widening fragment, one decidable step at a time.</h1>
+  <p class="lede">
+    The rule is: grow the logic only alongside a decision procedure. Everything
+    below is either shipped, in the next tranche, or genuinely open research —
+    and the open parts have a validation plan that doesn't need a referee.
+  </p>
+
+  <!-- ── Phases ─────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">01</span>Phases</h2>
+
+    <div class="phase">
+      <div class="ph-id"><span class="tag">Phase 0</span><span class="st done">Shipped</span></div>
+      <div>
+        <h3>Vertical slice</h3>
+        <p class="wide">One path through every layer: first-order
+          <code>Int</code> / <code>Boolean</code> functions, <code>if</code> /
+          <code>case</code>-on-Boolean path conditions, PrimOp resolution for
+          Ord / Ring / Semiring / EuclideanRing / Eq / HeytingAlgebra, aliases +
+          function specs, Z3 verdicts with spans and countermodels, golden test.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-id"><span class="tag">Phase 1</span><span class="st done">Shipped</span></div>
+      <div>
+        <h3>Minimal viable verifier</h3>
+        <p class="wide">Multi-alternative Int-literal cases and guards;
+          <code>let</code>; dependent specs across argument binders;
+          <strong>calls to spec'd functions</strong> — preconditions checked at
+          the call site, postconditions assumed via fresh result variables;
+          <strong>recursion</strong> by assuming the function's own spec;
+          <strong><code>assume</code></strong> specs for imports and FFI; a
+          <code>docs.json</code> signature cross-check that fails drifted specs
+          before solving; <code>verify-all</code> as a spago backend;
+          <code>--include</code> corpora and <code>lib/prelude.lps</code>;
+          <code>--smt2-dir</code> replayable artifacts.</p>
+        <p class="caption">Status 2026-07-04: landed same day as the slice. Call
+          facts are scoped per path, so an assumed postcondition can't leak into
+          a sibling branch. Remaining leftover — recursive <code>let</code> with
+          local function specs — folds forward into Phase 3.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-id"><span class="tag">Phase 2</span><span class="st done">Shipped · first cut</span></div>
+      <div>
+        <h3>Measures and data</h3>
+        <p class="wide">Monomorphic inductive ADTs: <code>data</code> and
+          <code>measure</code> declarations, datatypes as opaque SMT sorts,
+          constructor binders contributing discriminator and measure facts,
+          measure refinements instantiated at each application site to keep the
+          logic quantifier-free. <strong>Arrays</strong> arrive as a built-in
+          element-erased sort with a built-in <code>length</code> measure and
+          trusted <code>Data.Array</code> specs.</p>
+        <p class="caption">Status 2026-07-04: <code>P2</code> proves
+          <code>count</code> / <code>append</code> / <code>singleton</code> and
+          refutes <code>badCount</code>; <code>Arrays</code> proves literal
+          lengths, growth, and valid indexing, and refutes <code>badMid</code>.
+          Remaining: selector-style field access, flat records, polymorphic
+          element sorts.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-id"><span class="tag">Phase 3</span><span class="st next">Roadmap</span></div>
+      <div>
+        <h3>Higher-order</h3>
+        <p class="wide">Abstract refinements, refinement inference for lambdas,
+          and specs for <code>map</code> / <code>filter</code> /
+          <code>fold</code>. <strong>Not built yet.</strong></p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-id"><span class="tag">Phase 4</span><span class="st open">Open research</span></div>
+      <div>
+        <h3>Type classes &amp; row-polymorphic records</h3>
+        <p class="wide">Bounded refinements, per-instance specs, and refinements
+          over row-polymorphic records. Genuinely open — the metatheory here
+          isn't settled. <strong>Not built yet</strong>, and described as
+          research, not a promise.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Research validation ────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">02</span>Validating research without a peer reviewer</h2>
+    <p class="wide">
+      The open work — row-polymorphic record refinements especially — is in
+      scope to attempt, under one honest constraint: there is no expert on hand
+      to referee the metatheory. So the acceptance test is not a proof. It is a
+      <strong>human-checkable test corpus</strong>.
+    </p>
+
+    <div class="two-col" style="margin-top:1.4rem">
+      <div>
+        <h3>1 · Inspectable triples</h3>
+        <p>Before any research implementation, write (code, spec, expected
+          verdict) triples small enough that a careful reader can judge each by
+          eye — “this should obviously be SAFE / UNSAFE,” no theory needed. UNSAFE
+          cases in equal number to SAFE.</p>
+      </div>
+      <div>
+        <h3>2 · Named soundness traps</h3>
+        <p>Include cases engineered so a specific tempting-but-unsound shortcut —
+          refinement leaking across row extension, width subtyping forgetting a
+          refined field, alias capture in record update — would flip one
+          expected-UNSAFE to SAFE. Each trap is named in a comment.</p>
+      </div>
+    </div>
+
+    <div class="note-box" style="border-left-color:var(--safe)">
+      <p style="margin:0"><strong>3 · The corpus is the contract.</strong> An
+      implementation is accepted only when the corpus passes <em>and</em> every
+      trap still refutes — and rejected wholesale the moment any trap blesses.
+      This is differential-conformance thinking: an executable, inspectable
+      artifact standing in for the review we don't have. The corpus outlives any
+      one implementation attempt.</p>
+    </div>
+  </section>
+
+  <!-- ── Cross-cutting ──────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">03</span>Cross-cutting, when it earns its keep</h2>
+    <div class="two-col">
+      <div>
+        <h3>Browser playground</h3>
+        <p>The SMT transport is designed to be swappable — a z3-WASM build runs
+          the same obligations in the browser with no binary, for per-binding
+          verified-feedback in an editor.</p>
+      </div>
+      <div>
+        <h3>Verification coverage as cartography</h3>
+        <p>A Minard overlay showing <em>which</em> functions are verified —
+          coverage as a map layer over the codebase.</p>
+      </div>
+    </div>
+    <h3>Backend parity — proofs that hold for Erlang too</h3>
+    <p class="wide">
+      CoreFn is backend-agnostic, so a proof about the core holds for any
+      backend's output. A pattern that proves
+      <code>{ v : Int | 0 &lt;= v &amp;&amp; v &lt; 128 }</code> is a MIDI-safe
+      pattern whether it runs on JavaScript or on the Erlang backend — directly
+      relevant to the live-coding stack, where verified refinements would mean
+      verified-safe musical patterns on the BEAM.
+    </p>
+  </section>
+
+  <footer>
+    <span>The dated status notes and six ADRs live in <code>docs/PLAN.md</code>.</span>
+    <span><a href="https://github.com/afcondon/liquid-purescript">github.com/afcondon/liquid-purescript</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

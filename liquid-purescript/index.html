@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid PureScript — refinement types for PureScript</title>
+  <meta name="description" content="Liquid Haskell-style refinement type verification for PureScript, as an external tool over CoreFn. You write ordinary PureScript; a sibling .lps file refines the types; the tool proves it with Z3 or shows a counterexample.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <a href="index.html" class="wordmark">Liquid PureScript <span class="lpsq">· lps</span></a>
+    <span class="colophon">Refinement types · external tool · Z3</span>
+  </header>
+
+  <nav class="page-nav">
+    <span class="current">Overview</span>
+    <a href="how-it-works.html">How it works</a>
+    <a href="language.html">The spec language</a>
+    <a href="verdicts.html">Verdicts</a>
+    <a href="roadmap.html">Roadmap</a>
+    <a class="repo" href="https://github.com/afcondon/liquid-purescript">GitHub ↗</a>
+  </nav>
+
+  <p class="kicker">Refinement types for PureScript</p>
+  <h1 class="title">Say what a function must return. Have it proved.</h1>
+  <p class="lede">
+    You write ordinary PureScript. A sibling <code>.lps</code> file refines the
+    types of the functions you care about. <code>lps verify</code> proves the
+    refinements hold — or hands you a counterexample.
+    <span class="muted">No compiler fork; it reads the CoreFn the compiler
+    already emits and discharges its obligations with Z3.</span>
+  </p>
+
+  <!-- ── Hero: paired code / spec / verdict ─────────────────── -->
+  <section>
+    <div class="pair">
+      <div>
+        <p class="filetag">Demo.purs — ordinary PureScript</p>
+        <pre><code>module Demo where
+
+abs :: Int -> Int
+abs n = if n > 0 then n else 0 - n
+
+bad :: Int -> Int
+bad n = n - 1</code></pre>
+      </div>
+      <div>
+        <p class="filetag">Demo.lps — the refinement layer</p>
+        <pre><code>type Nat = { v : Int | v >= 0 }
+
+abs :: Int -> Nat
+
+bad :: Int -> Nat</code></pre>
+      </div>
+    </div>
+
+    <div class="console"><span class="prompt">$</span> lps verify --output output Demo
+<span class="ok">Demo.abs  ✓ SAFE</span>
+<span class="bad">Demo.bad  ✗ UNSAFE</span>
+<span class="dim">    at src/Demo.purs:9:9</span>
+<span class="dim">    cannot prove: ((n - 1) >= 0)</span>
+<span class="bad">    counterexample: n = 0</span></div>
+
+    <p class="caption" style="margin-top:0.9rem">
+      Both functions typecheck for the compiler. Only one satisfies its
+      refinement — and when the tool disagrees, it says exactly why, at the
+      exact span, with a value that breaks it.
+    </p>
+  </section>
+
+  <!-- ── Stats ──────────────────────────────────────────────── -->
+  <div class="stats">
+    <div class="stat"><span class="n green">22</span><span class="l">Functions proved SAFE</span></div>
+    <div class="stat"><span class="n red">4</span><span class="l">Refuted with a counterexample</span></div>
+    <div class="stat"><span class="n">4</span><span class="l">Example modules</span></div>
+    <div class="stat"><span class="n">QF_LIA</span><span class="l">Decidable logic — Z3 never guesses</span></div>
+  </div>
+
+  <!-- ── Why ────────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">01</span>What refinement types buy you</h2>
+    <p class="wide">
+      A PureScript type says a function returns an <code>Int</code>. A
+      <em>refinement</em> type says which <code>Int</code>: one that is
+      <code>&gt;= 0</code>, or a valid index into an array, or a MIDI-safe
+      <code>0 &lt;= v &amp;&amp; v &lt; 128</code>. The invariants you would
+      otherwise keep in comments, tests, or your head become part of the type —
+      and get checked on every build.
+    </p>
+    <p class="wide">
+      The refinements live in a separate file, so your source stays ordinary
+      PureScript that any toolchain compiles. Refine only the functions that
+      matter; the rest are simply unchecked.
+    </p>
+
+    <div class="two-col" style="margin-top:1.6rem">
+      <div>
+        <h3>Precise, not just present</h3>
+        <p><code>clamp lo hi x</code> doesn't merely return an
+        <code>Int</code> — it returns one in <code>[lo, hi]</code>, and the
+        spec carries the dependency between arguments:</p>
+        <pre><code>clamp :: { lo : Int }
+      -> { hi : Int | hi >= lo }
+      -> Int
+      -> { v : Int | v >= lo && v <= hi }</code></pre>
+      </div>
+      <div>
+        <h3>A counterexample, not a scolding</h3>
+        <p>When a proof fails you get a concrete input that breaks the
+        claim — the empty array for an index that assumed non-emptiness:</p>
+        <div class="console"><span class="bad">Arrays.badMid  ✗ UNSAFE</span>
+<span class="dim">    cannot prove:</span>
+<span class="dim">      (len/2 >= 0) && (len/2 < length xs)</span>
+<span class="bad">    counterexample: xs = []</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Honesty ────────────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">02</span>What it does <em>not</em> claim</h2>
+    <p class="wide">
+      Honesty is a feature. This verifies a <strong>fragment</strong>:
+      first-order <code>Int</code> / <code>Boolean</code> / measured-data code.
+    </p>
+    <div class="note-box">
+      <p style="margin:0"><strong>Everything outside the fragment reports
+      <span class="badge unknown">Unsupported</span></strong>, never a silent
+      pass. Higher-order functions, type classes, and row-polymorphic records
+      are <a href="roadmap.html">roadmap</a>, not shipped. And an
+      <code>assume</code> spec is <em>trusted</em>, not checked — a stated axiom
+      for imported or FFI functions, taken on faith and marked as such wherever
+      it appears.</p>
+    </div>
+  </section>
+
+  <!-- ── Getting started ────────────────────────────────────── -->
+  <section>
+    <h2><span class="idx">03</span>Getting started</h2>
+    <p><strong>Requirements.</strong> <code>purs</code> 0.15.x,
+      <code>spago@next</code>, node, and a <code>z3</code> binary on the PATH.</p>
+    <pre><code>make examples   # compile examples/ to CoreFn (spago backend trick)
+make verify     # verify every example module that has a .lps spec
+make test       # golden test — the verdict table on this site
+make bundle     # standalone bin/lps.mjs (node, no spago needed)</code></pre>
+    <p style="margin-top:1rem">Direct invocation over any spago project's build output:</p>
+    <pre><code>lps verify     --output &lt;dir&gt; &lt;ModuleName&gt; [--spec &lt;file.lps&gt;]
+               [--include &lt;file.lps&gt;]... [--smt2-dir &lt;dir&gt;]
+lps verify-all --output &lt;dir&gt; [--include &lt;file.lps&gt;]... [--smt2-dir &lt;dir&gt;]</code></pre>
+    <p class="caption" style="margin-top:0.9rem">
+      <code>--include lib/prelude.lps</code> prepends trusted specs for
+      <code>min</code> / <code>max</code> / <code>abs</code> / <code>signum</code>
+      / <code>clamp</code> on <code>Int</code>. <code>--smt2-dir</code> dumps
+      every obligation as a replayable <code>.smt2</code> artifact.
+    </p>
+  </section>
+
+  <footer>
+    <span>Liquid PureScript · a refinement-type verifier over CoreFn · solved with Z3</span>
+    <span><a href="https://github.com/afcondon/liquid-purescript">github.com/afcondon/liquid-purescript</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

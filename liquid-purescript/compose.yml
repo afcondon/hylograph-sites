@@ -1,0 +1,13 @@
+# Bosun x-bosun.static declaration for the Liquid PureScript docs site.
+# StaticCDN apply is a Manual advisory (no automated deploy) — Bosun validates
+# and emits the wrangler command; the actual publish is run by hand/agent.
+services:
+  liquid-purescript:
+    x-bosun:
+      host: cloudflare
+      probe: http
+      static:
+        channel: cloudflare-pages-wrangler
+        cfProject: liquid-purescript
+        artifactDir: /Users/afc/work/afc-work/cloudflare-sites/liquid-purescript
+        url: https://liquid-purescript.hylograph.net
