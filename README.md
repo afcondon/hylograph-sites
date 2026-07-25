@@ -16,6 +16,7 @@ Renamed from `hylograph-sites` on 2026-04-24 to reflect its actual role (it hold
 | `signal-box/` | signal-box.hylograph.net | `signal-box` ¹ | TBD ¹ | #234 |
 | `widgets/` | widgets.hylograph.net ² | `hylograph-widgets` | ✗ (manual wrangler) | #244 |
 | `liquid-purescript/` | liquid-purescript.hylograph.net | `liquid-purescript` | ✗ (`quartermaster publish`) | #247 |
+| _(external — `music/harmonia/site/`)_ | harmonia.andrewcondon.com (+ harmonia-c8x.pages.dev) | `harmonia` | ✗ (manual wrangler; source in `purescript-harmonia`, not a subdir here) | — |
 
 ¹ signal-box is the Polyglot flagship demo ("Make Illegal States Unrepresentable", static, five pages). Its CF project name and git-connected status are assumed/unconfirmed — verify before relying on them.
 
@@ -57,6 +58,19 @@ npx wrangler pages deploy heresiarch   --project-name heresiarch
 npx wrangler pages deploy signal-box   --project-name signal-box   # CF project name assumed — see ¹ above
 npx wrangler pages deploy widgets      --project-name hylograph-widgets --branch main --commit-dirty=true
 ```
+
+`harmonia` is the odd one out — it deploys the engraved showcase from its **own
+repo** (`music/harmonia/site/`), not a subdir here, and is recorded above only
+for inventory completeness:
+
+```bash
+# from the afc-work root:
+npx wrangler pages deploy music/harmonia/site --project-name harmonia --branch main --commit-dirty=true
+```
+
+Custom domain `harmonia.andrewcondon.com` is attached in the CF dashboard
+(Pages → harmonia → Custom domains); the CNAME is auto-created since
+`andrewcondon.com` is on Cloudflare.
 
 `liquid-purescript/` deploys through the infrastructure, not raw wrangler — it's
 an `x-bosun.static` site published by **`quartermaster publish`** (ensures the CF
