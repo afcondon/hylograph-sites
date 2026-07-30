@@ -16,9 +16,12 @@ Renamed from `hylograph-sites` on 2026-04-24 to reflect its actual role (it hold
 | `signal-box/` | signal-box.hylograph.net | `signal-box` ¹ | TBD ¹ | #234 |
 | `widgets/` | widgets.hylograph.net ² | `hylograph-widgets` | ✗ (manual wrangler) | #244 |
 | `liquid-purescript/` | liquid-purescript.hylograph.net | `liquid-purescript` | ✗ (`quartermaster publish`) | #247 |
+| `zoo/` | zoo.hylograph.net ³ | `hylograph-zoo` ³ | ✗ (not yet created) | #266 |
 | _(external — `music/harmonia/site/`)_ | harmonia.andrewcondon.com (+ harmonia-c8x.pages.dev) | `harmonia` | ✗ (manual wrangler; source in `purescript-harmonia`, not a subdir here) | — |
 
 ¹ signal-box is the Polyglot flagship demo ("Make Illegal States Unrepresentable", static, five pages). Its CF project name and git-connected status are assumed/unconfirmed — verify before relying on them.
+
+³ zoo is **The Morphism Zoo** (source: `purescript-hylograph-showcases/psd3-prim-zoo-mosh`, tracker #81) — a guide to recursion schemes in two registers: a children's-book treatment with a page per creature, and an "Anatomical Museum" that typesets the same eight schemes as a Tufte paper. Entirely static, no backend. **The artifact is staged and verified rendering locally, but the CF Pages project does not exist yet** — `hylograph-zoo` is the intended name, following the `hylograph-*` convention, and the custom domain still needs attaching. Rebuild with `spago bundle` in the source repo, then copy `public/{index.html,style.css,bundle.js}` here.
 
 ² widgets is the **Hylograph Halogen UI** gallery (the `purescript-hylograph-halogen-ui` showcase — fourteen widgets on one controlled contract). Project `hylograph-widgets` created and first-deployed 2026-06-24, live at [hylograph-widgets.pages.dev](https://hylograph-widgets.pages.dev). Custom domain `widgets.hylograph.net` still to be attached in the CF dashboard (Pages → hylograph-widgets → Custom domains).
 

@@ -1,0 +1,1410 @@
+/* =============================================================================
+   The Morphism Zoo - Styles
+   A whimsical, children's book aesthetic for recursion schemes
+   ============================================================================= */
+
+:root {
+  --zoo-cream: #FFF8E7;
+  --zoo-warm-white: #FFFDF7;
+  --zoo-charcoal: #2D3436;
+  --zoo-orange: #FF6B35;
+  --zoo-teal: #00B4A0;
+  --zoo-purple: #845EC2;
+  --zoo-yellow: #FFD93D;
+  --zoo-pink: #FF78AE;
+  --zoo-blue: #4D8BF5;
+  --zoo-light-gray: #F0EDE5;
+  --zoo-green: #2ECC71;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 18px; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+  background: var(--zoo-cream);
+  color: var(--zoo-charcoal);
+  line-height: 1.6;
+}
+
+/* =============================================================================
+   Book Layout — viewport with page peek edges
+   ============================================================================= */
+
+.zoo-book {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.book-viewport {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+/* -- Peek edges (clipped adjacent pages) ----------------------------------- */
+
+.page-peek {
+  flex-shrink: 0;
+  width: 50px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  border-radius: 1rem;
+  transition: width 0.15s ease;
+}
+
+.page-peek:hover {
+  width: 65px;
+}
+
+.peek-left {
+  margin-right: 0;
+}
+
+.peek-left > .book-page {
+  /* Show the RIGHT edge of the previous page */
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 800px;
+  min-height: 100%;
+}
+
+.peek-right {
+  margin-left: 0;
+}
+
+.peek-right > .book-page {
+  /* Show the LEFT edge of the next page */
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 800px;
+  min-height: 100%;
+}
+
+/* -- Current page ---------------------------------------------------------- */
+
+.page-current {
+  flex: 1;
+  min-width: 0;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* -- Book page (shared by cover + chapter) --------------------------------- */
+
+.book-page {
+  background: var(--zoo-warm-white);
+  border: 4px solid var(--zoo-charcoal);
+  border-radius: 1.5rem;
+  min-height: 100%;
+}
+
+/* =============================================================================
+   Cover Page
+   ============================================================================= */
+
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 100%;
+}
+
+.cover-content {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.cover-title {
+  font-size: 3.2rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--zoo-charcoal);
+  text-shadow: 3px 3px 0 white;
+}
+
+.cover-subtitle {
+  font-size: 1.3rem;
+  margin: 0 0 2.5rem 0;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.cover-dag {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: radial-gradient(ellipse at center, rgba(255,215,61,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cover-hint {
+  margin-top: 2.5rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  opacity: 0.5;
+  letter-spacing: 0.03em;
+}
+
+.cover-museum-link {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  opacity: 0;
+  animation: fadeInMuseumLink 1s ease 2s forwards;
+}
+
+.museum-link-text {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-style: italic;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  letter-spacing: 0.03em;
+}
+
+.museum-link-text:hover {
+  color: #555;
+  border-bottom-color: #999;
+}
+
+.cover-link-sep {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-style: italic;
+  color: #aaa;
+  font-size: 0.8rem;
+}
+
+@keyframes fadeInMuseumLink {
+  to { opacity: 0.6; }
+}
+
+/* =============================================================================
+   Museum Invite Page (bridge between Zoo and Anatomical Museum)
+   ============================================================================= */
+
+.museum-invite-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  background: linear-gradient(180deg, var(--zoo-warm-white) 0%, #f5f0e6 100%);
+}
+
+.museum-invite-content {
+  text-align: center;
+  max-width: 500px;
+  padding: 3rem 2rem;
+}
+
+.museum-invite-prelude {
+  font-size: 1.1rem;
+  font-style: italic;
+  opacity: 0.7;
+  margin: 0 0 0.25rem 0;
+}
+
+.museum-invite-zoo-name {
+  font-size: 1.6rem;
+  margin: 0 0 2rem 0;
+  color: var(--zoo-charcoal);
+}
+
+.museum-invite-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--zoo-charcoal);
+  margin: 0 auto 2rem;
+  opacity: 0.3;
+}
+
+.museum-invite-question {
+  font-size: 1.15rem;
+  font-style: italic;
+  margin: 0 0 2.5rem 0;
+  opacity: 0.75;
+}
+
+.museum-invite-title {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.5rem 0;
+  color: #111;
+}
+
+.museum-invite-subtitle {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #777;
+  margin: 0 0 2.5rem 0;
+}
+
+.museum-enter-button {
+  font-size: 1rem;
+  padding: 0.6rem 2rem;
+}
+
+/* =============================================================================
+   Chapter Page
+   ============================================================================= */
+
+.chapter-page {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.chapter-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-title {
+  font-size: 1.8rem;
+  margin: 0 0 0.25rem 0;
+  text-shadow: 1px 1px 0 white;
+}
+
+.chapter-tagline {
+  margin: 0;
+  font-size: 1rem;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* =============================================================================
+   Morphism DAG SVG
+   ============================================================================= */
+
+.dag-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.dag-node {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.dag-node circle {
+  transition: filter 0.15s ease;
+  filter: drop-shadow(2px 3px 1px rgba(45,52,54,0.25));
+}
+
+.dag-node:hover {
+  transform: scale(1.12);
+}
+
+.dag-node:hover circle {
+  filter: brightness(1.08) drop-shadow(5px 8px 3px rgba(45,52,54,0.35));
+}
+
+.dag-node.active circle {
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.35));
+}
+
+/* =============================================================================
+   Chapter Content (panels area)
+   ============================================================================= */
+
+
+/* =============================================================================
+   Comic Strip - All panels visible
+   ============================================================================= */
+
+.comic-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.comic-panel {
+  background: white;
+  border: 4px solid var(--zoo-charcoal);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 4px 4px 0 var(--zoo-charcoal);
+  transition: transform 0.15s ease;
+}
+
+.comic-panel:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--zoo-charcoal);
+}
+
+/* =============================================================================
+   Container & Header
+   ============================================================================= */
+
+.zoo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.zoo-header {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, var(--zoo-yellow) 0%, var(--zoo-orange) 100%);
+  border-radius: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+}
+
+.zoo-header h1 {
+  font-size: 3.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--zoo-charcoal);
+  text-shadow: 3px 3px 0 white;
+  letter-spacing: 0.05em;
+  animation: bounce 3s ease-in-out infinite;
+}
+
+.zoo-header .subtitle {
+  font-size: 1.4rem;
+  margin: 0;
+  color: var(--zoo-charcoal);
+  opacity: 0.9;
+}
+
+.zoo-intro {
+  max-width: 800px;
+  margin: 0 auto 3rem auto;
+  text-align: center;
+  font-size: 1.1rem;
+  padding: 1.5rem;
+  background: var(--zoo-warm-white);
+  border-radius: 1rem;
+  border: 3px dashed var(--zoo-teal);
+}
+
+/* =============================================================================
+   Zoo Grid
+   ============================================================================= */
+
+.zoo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* =============================================================================
+   Exhibit Cards
+   ============================================================================= */
+
+.zoo-exhibit {
+  background: var(--zoo-warm-white);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 4px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.zoo-exhibit.clickable:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.exhibit-cata { border-color: var(--zoo-orange); }
+.exhibit-ana { border-color: var(--zoo-blue); }
+.exhibit-hylo { border-color: var(--zoo-purple); }
+.exhibit-para { border-color: var(--zoo-teal); }
+.exhibit-apo { border-color: var(--zoo-pink); }
+.exhibit-histo { border-color: var(--zoo-yellow); }
+.exhibit-futu { border-color: var(--zoo-orange); }
+.exhibit-zygo { border-color: var(--zoo-green); }
+
+.exhibit-header h2 {
+  font-size: 1.3rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.exhibit-header .tagline {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.zoo-exhibit .description {
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  line-height: 1.5;
+}
+
+.click-hint {
+  text-align: center;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, var(--zoo-yellow) 0%, var(--zoo-orange) 100%);
+  border-radius: 0.75rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+/* =============================================================================
+   Footer
+   ============================================================================= */
+
+.zoo-footer {
+  text-align: center;
+  padding: 3rem 1rem;
+  margin-top: 3rem;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+
+/* =============================================================================
+   Storybook Overlay
+   ============================================================================= */
+
+.storybook-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.storybook {
+  background: var(--zoo-cream);
+  border-radius: 1.5rem;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 6px solid var(--zoo-charcoal);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.storybook-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 3px solid var(--zoo-charcoal);
+  background: var(--zoo-yellow);
+  color: var(--zoo-charcoal);
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+  z-index: 10;
+  line-height: 1;
+}
+
+.storybook-close:hover {
+  transform: scale(1.1) rotate(90deg);
+  background: var(--zoo-orange);
+}
+
+.storybook-header {
+  padding: 1.25rem 4rem 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--zoo-yellow) 0%, var(--zoo-orange) 100%);
+  border-bottom: 4px solid var(--zoo-charcoal);
+}
+
+.storybook-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--zoo-charcoal);
+  text-shadow: 1px 1px 0 white;
+}
+
+.storybook-page {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* =============================================================================
+   Story Page Content
+   ============================================================================= */
+
+.story-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.speech-bubble {
+  background: var(--zoo-yellow);
+  border: 3px solid var(--zoo-charcoal);
+  border-radius: 1.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  font-size: 0.95rem;
+  max-width: 100%;
+  text-align: center;
+  box-shadow: 3px 3px 0 var(--zoo-charcoal);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: var(--zoo-charcoal);
+  border-bottom: 0;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 7px solid transparent;
+  border-top-color: var(--zoo-yellow);
+  border-bottom: 0;
+}
+
+.story-diagram {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin: 0.5rem 0;
+}
+
+.page-caption {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--zoo-charcoal);
+  opacity: 0.7;
+  margin: 0.5rem 0 0 0;
+  text-align: center;
+}
+
+/* =============================================================================
+   Code Section with Egg Reveal
+   ============================================================================= */
+
+.code-section {
+  background: var(--zoo-light-gray);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.code-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--zoo-purple);
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.code-example {
+  margin-bottom: 1.5rem;
+}
+
+.code-example h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--zoo-charcoal);
+}
+
+.code-block {
+  background: var(--zoo-charcoal);
+  color: #F8F8F2;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.code-block.usage {
+  border-left: 4px solid var(--zoo-teal);
+}
+
+.code-block.signature {
+  border-left: 4px solid var(--zoo-purple);
+}
+
+/* Egg reveal container */
+.signature-container {
+  text-align: center;
+}
+
+.signature-egg {
+  display: flex;
+  justify-content: center;
+}
+
+.egg-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #F5F0E6 0%, #E8E0D0 100%);
+  border: 4px solid var(--zoo-charcoal);
+  border-radius: 3rem;
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 4px 4px 0 var(--zoo-charcoal);
+}
+
+.egg-button:hover {
+  transform: translate(-2px, -2px) scale(1.02);
+  box-shadow: 6px 6px 0 var(--zoo-charcoal);
+}
+
+.egg-button:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--zoo-charcoal);
+}
+
+.egg-icon {
+  font-size: 2rem;
+  animation: wiggle 2s ease-in-out infinite;
+}
+
+.egg-text {
+  color: var(--zoo-charcoal);
+  font-weight: bold;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+/* Revealed signature */
+.signature-revealed {
+  animation: hatch 0.5s ease-out;
+}
+
+.signature-revealed h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--zoo-purple);
+}
+
+.signature-explained {
+  margin: 1rem 0 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  border-left: 4px solid var(--zoo-purple);
+}
+
+@keyframes hatch {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =============================================================================
+   Navigation
+   ============================================================================= */
+
+.storybook-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--zoo-light-gray);
+  border-top: 4px solid var(--zoo-charcoal);
+}
+
+.nav-btn {
+  background: var(--zoo-purple);
+  color: white;
+  border: 3px solid var(--zoo-charcoal);
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  box-shadow: 3px 3px 0 var(--zoo-charcoal);
+}
+
+.nav-btn:hover:not(.disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--zoo-charcoal);
+  background: var(--zoo-pink);
+}
+
+.nav-btn:active:not(.disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--zoo-charcoal);
+}
+
+.nav-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-dots {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--zoo-charcoal);
+  background: white;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.dot:hover {
+  transform: scale(1.2);
+}
+
+.dot.active {
+  background: var(--zoo-purple);
+  transform: scale(1.3);
+}
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .page-peek { width: 30px; }
+  .page-peek:hover { width: 40px; }
+  .cover-title { font-size: 2rem; }
+  .chapter-title { font-size: 1.4rem; }
+  .chapter-page { padding: 1rem; }
+
+  .comic-strip { grid-template-columns: 1fr; gap: 1rem; }
+  .comic-panel { padding: 0.75rem; }
+  .speech-bubble { font-size: 0.9rem; padding: 0.5rem 0.75rem; }
+
+  .egg-button { padding: 0.75rem 1rem; }
+  .egg-icon { font-size: 1.5rem; }
+}
+
+/* =============================================================================
+   Animations
+   ============================================================================= */
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pageFlip {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.story-page, .code-page {
+  animation: pageFlip 0.3s ease-out;
+}
+
+/* =============================================================================
+   Math Book View — Tufte-inspired type substitution pages
+   Modelled on the Anscombe's Quartet demo from hylograph-music:
+   small-caps titles, Palatino serif, #fffff8 background, thin rules
+   ============================================================================= */
+
+.math-mode .book-viewport {
+  display: none;
+}
+
+.math-chapter {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  background: #fffff8 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  line-height: 1.5;
+  padding: 2.5rem 2rem;
+}
+
+.museum-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.museum-label {
+  font-variant: small-caps;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: #999;
+}
+
+/* -- Fixed sidenav (right edge) ------------------------------------------- */
+
+.museum-sidenav {
+  position: fixed;
+  top: 2.5rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  z-index: 10;
+}
+
+.sidenav-entry {
+  display: flex;
+  line-height: 1.5;
+}
+
+.sidenav-prefix,
+.sidenav-suffix {
+  background: none;
+  border: none;
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-size: 0.72rem;
+  color: #ccc;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidenav-prefix:hover {
+  color: #888;
+  border-bottom-color: #bbb;
+}
+
+.sidenav-suffix:hover {
+  color: var(--morph-color);
+  border-bottom-color: var(--morph-color);
+}
+
+.sidenav-entry.active .sidenav-prefix,
+.sidenav-entry.active .sidenav-suffix {
+  color: #999;
+}
+
+.sidenav-divider {
+  font-family: 'STIX Two Text', Georgia, serif;
+  color: #d0c8b8;
+  font-size: 0.8rem;
+  align-self: center;
+  padding: 0.25rem 0;
+  line-height: 1;
+}
+
+.sidenav-paper-link {
+  background: none;
+  border: none;
+  font-family: 'STIX Two Text', 'Computer Modern', Georgia, serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: #ccc;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidenav-paper-link:hover {
+  color: #888;
+  border-bottom-color: #bbb;
+}
+
+/* Paper badge on Hylo museum page */
+.museum-paper-badge {
+  text-align: center;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8e4dc;
+}
+
+.paper-badge-btn {
+  display: inline-block;
+  background: none;
+  border: 1px solid #ccc;
+  font-family: 'STIX Two Text', 'Computer Modern', Georgia, serif;
+  font-size: 0.7rem;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: #999;
+  cursor: pointer;
+  padding: 0.25rem 0.8rem;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.paper-badge-btn:hover {
+  color: #555;
+  border-color: #888;
+}
+
+/* "See the algebra" button on the story view */
+.algebra-link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.math-button {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 1.2rem;
+  border: 1px solid var(--zoo-charcoal);
+  background: transparent;
+  color: var(--zoo-charcoal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.math-button:hover {
+  background: var(--zoo-charcoal);
+  color: #fffff8;
+}
+
+/* =============================================================================
+   Math page layout
+   ============================================================================= */
+
+.math-page {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.math-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.math-title {
+  font-size: 2rem;
+  font-weight: 400;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+  color: #111;
+}
+
+.math-tagline {
+  font-size: 1rem;
+  font-style: italic;
+  color: #555;
+  margin: 0 0 0.75rem 0;
+}
+
+.math-general {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.math-general code {
+  font-family: 'Fira Code', Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+/* =============================================================================
+   Usage code section
+   ============================================================================= */
+
+.math-section {
+  margin-bottom: 2rem;
+}
+
+.math-code {
+  background: transparent;
+  color: #111;
+  padding: 1rem 1.25rem;
+  font-family: 'Fira Code', Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  margin: 0;
+  overflow-x: auto;
+}
+
+/* =============================================================================
+   Thin rule between code and substitution steps
+   ============================================================================= */
+
+.math-rule {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0 0 2rem 0;
+}
+
+/* =============================================================================
+   Substitution banner (like Anscombe stats bar)
+   ============================================================================= */
+
+.math-substitution-banner {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 2.5rem;
+}
+
+.banner-sep {
+  color: #ccc;
+}
+
+.banner-subs {
+  font-family: 'Fira Code', Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  color: #111;
+  background: none;
+  padding: 0;
+}
+
+/* =============================================================================
+   Steps
+   ============================================================================= */
+
+.math-step {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e8e4dc;
+}
+
+.math-step:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #aaa;
+  color: #555;
+  font-size: 0.7rem;
+  font-family: 'Fira Code', monospace;
+  margin-top: 0.35rem;
+}
+
+.step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-signature {
+  background: transparent;
+  color: #111;
+  padding: 0.6rem 0.9rem;
+  font-family: 'Fira Code', Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin: 0 0 0.6rem 0;
+  overflow-x: auto;
+  border-left: 2px solid #ccc;
+}
+
+.step-annotation {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* =============================================================================
+   Punchline
+   ============================================================================= */
+
+.math-punchline {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #ddd;
+}
+
+.math-punchline blockquote {
+  margin: 0;
+  padding: 0;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: #111;
+  line-height: 1.7;
+}
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .math-page { padding: 0 0.5rem; }
+  .math-title { font-size: 1.5rem; }
+  .step-signature { font-size: 0.68rem; }
+  .math-step { gap: 0.75rem; }
+  .math-code { font-size: 0.7rem; padding: 0.75rem; }
+  .museum-sidenav { display: none; }
+}
+
+/* =============================================================================
+   Technical Paper View — ACM proceedings aesthetic
+   Computer Modern serif, two-column feel, numbered sections, figure captions
+   ============================================================================= */
+
+.paper-mode .book-viewport {
+  display: none;
+}
+
+.paper-chapter {
+  font-family: 'STIX Two Text', 'Computer Modern', 'Latin Modern Roman', Georgia, serif;
+  background: white;
+  color: #111;
+  line-height: 1.55;
+  padding: 2.5rem 2rem;
+  font-size: 0.95rem;
+}
+
+.paper-nav-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.paper-back-btn {
+  display: inline-block;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.paper-back-btn:hover {
+  border-bottom-color: #666;
+}
+
+/* -- Paper layout ---------------------------------------------------------- */
+
+.paper {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* -- Header (ACM-style) ---------------------------------------------------- */
+
+.paper-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #111;
+}
+
+.paper-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+  color: #111;
+}
+
+.paper-authors {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #444;
+  margin-bottom: 0.25rem;
+}
+
+.paper-affiliation {
+  font-size: 0.8rem;
+  font-style: normal;
+  color: #666;
+}
+
+.paper-venue {
+  font-size: 0.8rem;
+  color: #666;
+  letter-spacing: 0.03em;
+  margin-top: 0.5rem;
+}
+
+/* -- Abstract -------------------------------------------------------------- */
+
+.paper-abstract {
+  margin-bottom: 2rem;
+  padding: 0 1.5rem;
+}
+
+.paper-abstract h2 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.paper-abstract p {
+  font-size: 0.88rem;
+  text-align: justify;
+  margin: 0;
+}
+
+/* -- Sections -------------------------------------------------------------- */
+
+.paper-section {
+  margin-bottom: 1.75rem;
+}
+
+.paper-section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  color: #111;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3rem;
+}
+
+.section-num {
+  margin-right: 0.5rem;
+  font-weight: 400;
+}
+
+.paper-section p {
+  margin: 0 0 0.75rem 0;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.paper-section p:last-child {
+  margin-bottom: 0;
+}
+
+/* -- Code blocks ----------------------------------------------------------- */
+
+.paper-code {
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+  font-family: 'Fira Code', 'CMU Typewriter Text', Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+}
+
+/* -- Figures and diagrams -------------------------------------------------- */
+
+.paper-figure {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+}
+
+.paper-diagram {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+  font-family: 'Fira Code', Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  margin: 0;
+  overflow-x: auto;
+}
+
+.figure-caption {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.8rem;
+  color: #555;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* -- Acknowledgements ------------------------------------------------------ */
+
+.paper-acknowledgements p {
+  font-size: 0.9rem;
+}
+
+/* -- References ------------------------------------------------------------ */
+
+.paper-references h2 {
+  border-bottom: 2px solid #111;
+}
+
+.reference-list {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.reference {
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* -- Paper responsive ------------------------------------------------------ */
+
+@media (max-width: 768px) {
+  .paper-chapter { padding: 1.5rem 1rem; }
+  .paper-title { font-size: 1.3rem; }
+  .paper-abstract { padding: 0; }
+  .paper-diagram { font-size: 0.6rem; }
+}
