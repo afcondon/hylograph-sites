@@ -39,16 +39,23 @@ Websites #228
 Most subdirs are built artifacts from upstream repos — rebuild upstream, copy into here, commit.
 
 ```bash
-# In purescript-polyglot repo
-make website                             # Rebuilds polyglot site
-make blog                                # Rebuilds blog
+# In polyglot/purescript-polyglot-site (was purescript-polyglot until 2026-07-30)
+make blog                                # Rebuilds blog (site/website is a
+                                         #   separate Halogen site — see below)
 cd site/hylograph-net && ./build.sh      # Rebuilds docs
+cd site/polyglot      && ./build.sh      # Rebuilds the polyglot site (pandoc)
 
 # Then copy to this repo
-cp -r site/hylograph-net/public/*  ../cloudflare-sites/docs/
-cp -r blog/public/*                 ../cloudflare-sites/blog/
-cp -r site/website/public/*         ../cloudflare-sites/polyglot/
+cp -r site/hylograph-net/public/*  ../../cloudflare-sites/docs/
+cp -r blog/public/*                ../../cloudflare-sites/blog/
+cp -r site/polyglot/public/*       ../../cloudflare-sites/polyglot/
 ```
+
+Two corrections vs. what this file used to say: `polyglot/` is built from
+**`site/polyglot`** (hand-authored `index.html` + `style.css`, pandoc for the
+content pages), not from `site/website` — that is a *different* Halogen site
+(the `:3040` demo site). And the relative hops are now `../../` because the
+source repo moved one level deeper.
 
 For the three git-connected `hylograph-*` CF projects, a `git push` here is the deploy. For the manual ones:
 
@@ -101,6 +108,6 @@ A `deployments` table also records platform/url/target_name per project (`SELECT
 
 - [purescript-hylograph-libs](https://github.com/afcondon/purescript-hylograph-libs) — Published libraries
 - [purescript-hylograph-showcases](https://github.com/afcondon/purescript-hylograph-showcases) — Showcase apps
-- [purescript-polyglot](https://github.com/afcondon/purescript-polyglot) — Source of the three `hylograph-*` sites and `signal-box/`
+- [hsch-inc](https://github.com/afcondon/hsch-inc) — Source of the three `hylograph-*` sites and `signal-box/`; checked out locally as `polyglot/purescript-polyglot-site`
 - [HeresiarchHalogen](https://github.com/afcondon/HeresiarchHalogen) — Source of `andrewcondon/` and `heresiarch/`
 - [project-marginalia](https://github.com/afcondon/project-marginalia) — Project tracker; cloudflare-sites is #52 under Websites #228
